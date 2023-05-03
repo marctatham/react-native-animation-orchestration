@@ -1,7 +1,7 @@
 import { Button, useColorScheme, View } from "react-native";
 import { Colors, Header } from "react-native/Libraries/NewAppScreen";
 import React from "react";
-import Section from "./Section";
+import Section from "./components/common/Section";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { StackParamList } from "./navigation/RootNavigator";
 import { useNavigation } from "@react-navigation/native";
