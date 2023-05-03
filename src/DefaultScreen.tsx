@@ -1,53 +1,27 @@
-import { ScrollView, StyleSheet, Text, useColorScheme, View } from "react-native";
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from "react-native/Libraries/NewAppScreen";
+import { Button, useColorScheme, View } from "react-native";
+import { Colors, Header } from "react-native/Libraries/NewAppScreen";
 import React from "react";
 import Section from "./Section";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { StackParamList } from "./navigation/RootNavigator";
+import { useNavigation } from "@react-navigation/native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 function DefaultScreen(): JSX.Element {
+  const navigation = useNavigation<NativeStackNavigationProp<StackParamList>>();
   const isDarkMode = useColorScheme() === "dark";
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
-  };
+  const buttonHandler = () => navigation.navigate("AnimationScreen");
 
   return (
-    <ScrollView
-      contentInsetAdjustmentBehavior="automatic"
-      style={backgroundStyle}>
+    <SafeAreaView>
       <Header />
-      <View
-        style={{
-          backgroundColor: isDarkMode ? Colors.black : Colors.white,
-        }}>
-        <Section title="Step One">
-          Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-          screen and then come back to see your edits.
-        </Section>
-        <Section title="See Your Changes">
-          <ReloadInstructions />
-        </Section>
-        <Section title="Debug">
-          <DebugInstructions />
-        </Section>
-        <Section title="Learn More">
-          Read the docs to discover what to do next:
-        </Section>
-        <LearnMoreLinks />
+      <View style={{ height: "100%", backgroundColor: isDarkMode ? Colors.black : Colors.white }}>
+        <Section title="Step One">Click the button to begin the animation sequence.</Section>
+        <Button title="Start" onPress={buttonHandler} />
       </View>
-    </ScrollView>
+    </SafeAreaView>
   );
 }
 
 export default DefaultScreen;
-
-const styles = StyleSheet.create({
-  highlight: {
-    fontWeight: "700",
-  },
-});

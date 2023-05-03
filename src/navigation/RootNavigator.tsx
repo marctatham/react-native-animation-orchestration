@@ -1,11 +1,13 @@
 import * as React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import DefaultScreen from "../DefaultScreen";
+import AnimationScreen from "../AnimationScreen";
 
 const Stack = createNativeStackNavigator();
 
 export type StackParamList = {
   DefaultScreen: undefined;
+  AnimationScreen: undefined;
 };
 
 export const RootNavigator = (): JSX.Element => {
@@ -15,6 +17,11 @@ export const RootNavigator = (): JSX.Element => {
         name="DefaultScreen"
         component={DefaultScreen}
         options={{ title: "Home" }}
+      />
+      <Stack.Screen
+        name="AnimationScreen"
+        component={AnimationScreen}
+        options={{ title: "Animation" }}
       />
     </Stack.Navigator>
   );
