@@ -4,17 +4,41 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView, { AnimationObject } from "lottie-react-native";
 import StorySegmentIndicator from "./components/storyIndicator/StorySegmentIndicator";
 import StoryDescription from "./components/StoryDescription";
-import { resolveAnimationObject } from "./AnimationScreenUtils";
+import { ANIMATION_0, ANIMATION_1, ANIMATION_2, ANIMATION_3 } from "./AnimationScreenUtils";
 
 function AnimationScreen(): JSX.Element {
 
+  const [storyPart, setStoryPart] = useState<number>(0);
   const [currentSegment, setCurrentSegment] = useState<number>(0);
   const [animation, setAnimation] = useState<AnimationObject>();
 
+  /**
+   * Drives the story forward
+   * The storyPart represents where we are within the current sequence of events
+   */
   useEffect(() => {
-    const animationObject: AnimationObject = resolveAnimationObject(currentSegment);
-    setAnimation(animationObject);
-  }, [currentSegment]);
+    switch (storyPart) {
+      case 0: // start of segment 0 - Play lottie animation series1.json
+        setCurrentSegment(0);
+        setAnimation(ANIMATION_0);
+        break;
+      case 1:
+        setCurrentSegment(1);
+        setAnimation(ANIMATION_1);
+        break;
+      case 2:
+        setCurrentSegment(2);
+        setAnimation(ANIMATION_2);
+        break;
+      case 3:
+        setCurrentSegment(3);
+        setAnimation(ANIMATION_3);
+        break;
+
+      default:
+        console.warn(`Story part unhandled: ${storyPart}`);
+    }
+  }, [storyPart]);
 
   const onCurrentSegmentResetHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment ${segment} reset`);
@@ -22,12 +46,11 @@ function AnimationScreen(): JSX.Element {
 
   const onNewSegmentTappedHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment ${segment} tapped`);
-    setCurrentSegment(segment);
   };
 
   const onSegmentCompletedHandler = (segment: number) => {
     if (currentSegment < 3) {
-      setCurrentSegment(previousSegment => previousSegment + 1);
+      setStoryPart(previousStoryPart => previousStoryPart + 1);
       console.debug(`[AnimationScreen] Segment ${segment} completed, starting next segment`);
     } else {
       console.debug(`[AnimationScreen] Segment ${segment} completed`);
@@ -36,6 +59,7 @@ function AnimationScreen(): JSX.Element {
 
   const onLottieAnimationComplete = () => {
     console.debug(`[AnimationScreen] onLottieAnimationComplete`);
+    // we ignore this callback for now, but we'll come back to it later when we start incorporating fade transitions
   };
 
   return (
@@ -48,7 +72,7 @@ function AnimationScreen(): JSX.Element {
           onCurrentSegmentReset={onCurrentSegmentResetHandler}
           onNewSegmentTapped={onNewSegmentTappedHandler}
           onSegmentCompleted={onSegmentCompletedHandler}
-          segmentDurationInSeconds={2}
+          segmentDurationInSeconds={4}
         />
         <StoryDescription segment={currentSegment} />
       </View>
