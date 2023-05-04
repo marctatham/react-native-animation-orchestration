@@ -1,12 +1,20 @@
 import { StyleSheet, View } from "react-native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
-import LottieView from "lottie-react-native";
+import LottieView, { AnimationObject } from "lottie-react-native";
 import StorySegmentIndicator from "./components/storyIndicator/StorySegmentIndicator";
 import StoryDescription from "./components/StoryDescription";
+import { resolveAnimationObject } from "./AnimationScreenUtils";
 
 function AnimationScreen(): JSX.Element {
-  const [currentSegment, setCurrentSegment] = useState<number>(3);
+
+  const [currentSegment, setCurrentSegment] = useState<number>(0);
+  const [animation, setAnimation] = useState<AnimationObject>();
+
+  useEffect(() => {
+    const animationObject: AnimationObject = resolveAnimationObject(currentSegment);
+    setAnimation(animationObject);
+  }, [currentSegment]);
 
   const onCurrentSegmentResetHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment ${segment} reset`);
@@ -47,7 +55,8 @@ function AnimationScreen(): JSX.Element {
 
       <View style={styles.sectionBody}>
         <LottieView
-          source={require("../../assets/animations/animation_1.json")}
+          // @ts-ignore - Can safely be ignored as it's actively managed is never left empty
+          source={animation}
           loop={false}
           autoPlay={true}
           style={styles.animation}
