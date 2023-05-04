@@ -46,6 +46,7 @@ function AnimationScreen(): JSX.Element {
 
   const onNewSegmentTappedHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment ${segment} tapped`);
+    setStoryPart(segment); // TODO: for now, this is a 1 to 1 mapping of segment to story - this won't be the case for long
   };
 
   const onSegmentCompletedHandler = (segment: number) => {
