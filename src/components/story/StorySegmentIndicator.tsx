@@ -41,31 +41,32 @@ const StorySegmentIndicator: FC<Props> = ({
    * interval duration is based on the given duration prop
    */
   useEffect(() => {
-    const updateProgress = () =>
+    const updateProgress = () => {
       setCurrentSegmentProgress((prevProgress: number) => {
         if (prevProgress >= 100) {
-          cleanupResources();
+          cleanupTimer();
           onSegmentCompleted(currentSegment);
           return prevProgress;
         } else {
           return prevProgress >= 100 ? 100 : prevProgress + 1;
         }
       });
+    };
 
     // only configure interval if the current segment is not the last segment
     if (currentSegment < numberOfSegments) {
-      console.debug(`[StorySegmentIndicator] Configuring interval timer to manage segment: ${currentSegment}`);
+      console.debug(`[StorySegmentIndicator] setting up for segment: ${currentSegment} - reset progress & configure timer`);
+      setCurrentSegmentProgress(0);
       const intervalDurationInMillis = (segmentDurationInSeconds * 1000) / 100;
       unsubscribe.current = setInterval(updateProgress, intervalDurationInMillis);
     }
 
-    return cleanupResources;
+    return cleanupTimer;
   }, [currentSegment]);
 
-  const cleanupResources = () => {
-    console.debug(`[StorySegmentIndicator] finished segment ${currentSegment} - resetting state, cleaning up resources`);
-    setCurrentSegmentProgress(0);
+  const cleanupTimer = () => {
     if (unsubscribe.current) {
+      console.debug(`[StorySegmentIndicator] cleaning up interval timer for segment ${currentSegment}`);
       clearInterval(unsubscribe.current);
       unsubscribe.current = null;
     }
