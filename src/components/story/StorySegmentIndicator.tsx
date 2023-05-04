@@ -32,20 +32,15 @@ const StorySegmentIndicator: FC<Props> = ({
 }) => {
   // facilitates current segment progress as a percentage from 0 to 100
   const [currentSegmentProgress, setCurrentSegmentProgress] = useState<number>(0);
+  const unsubscribe: any = useRef(); // facilitates interval management
 
-  // facilitates interval management
-  const unsubscribe: any = useRef();
-
-  /**
-   * configures the interval to update the progress of the current segment
-   * interval duration is based on the given duration prop
-   */
+  // configures the component to update progress of the current segment
+  // this is time-based, based on the segmentDurationInSeconds prop
   useEffect(() => {
     const updateProgress = () => {
       setCurrentSegmentProgress((prevProgress: number) => {
         if (prevProgress >= 100) {
           cleanupTimer();
-          onSegmentCompleted(currentSegment);
           return prevProgress;
         } else {
           return prevProgress >= 100 ? 100 : prevProgress + 1;
@@ -63,6 +58,13 @@ const StorySegmentIndicator: FC<Props> = ({
 
     return cleanupTimer;
   }, [currentSegment]);
+
+  // manages notifying the consumer about completion of the current segment
+  useEffect(() => {
+    if (currentSegmentProgress === 100) {
+      onSegmentCompleted(currentSegment);
+    }
+  }, [currentSegmentProgress]);
 
   const cleanupTimer = () => {
     if (unsubscribe.current) {
