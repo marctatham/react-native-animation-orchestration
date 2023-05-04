@@ -83,9 +83,9 @@ const StorySegmentIndicator: FC<Props> = ({
       }
 
       const fragment =
-        <Fragment>
+        <Fragment key={`fragmentWrapper-${i}`}>
           <TouchableOpacity
-            key={`indicator-${i}`}
+            key={`touchableWrapper-${i}`}
             onPress={() => {
               if (currentSegment === i) {
                 setCurrentSegmentProgress(0);
@@ -96,11 +96,11 @@ const StorySegmentIndicator: FC<Props> = ({
             }}
             style={{ ...styles.itemView, height: HEIGHT }}
             hitSlop={{ top: 10, left: 0, bottom: 10, right: 0 }}>
-            <StorySegment key={`indicator-${i}`} progressPercentage={progressPercentage} height={HEIGHT} />
+            <StorySegment key={`storySegment-${i}`} progressPercentage={progressPercentage} height={HEIGHT} />
           </TouchableOpacity>
 
           {/*Add margin in between story segments when relevant*/}
-          {i !== numberOfSegments - 1 && <View key={`${i}-marginView`} style={{ width: 8 }} />}
+          {i !== numberOfSegments - 1 && <View key={`marginView-${i}`} style={{ width: 8 }} />}
         </Fragment>;
 
       storySegments.push(fragment);
