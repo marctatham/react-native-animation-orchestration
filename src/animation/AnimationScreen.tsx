@@ -18,7 +18,7 @@ function AnimationScreen(): JSX.Element {
    */
   useEffect(() => {
     switch (storyPart) {
-      case 0: // start of segment 0 - Play lottie animation series1.json
+      case 0:
         setCurrentSegment(0);
         setAnimation(ANIMATION_0);
         break;
