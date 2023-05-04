@@ -50,13 +50,21 @@ const StorySegmentIndicator: FC<Props> = ({
       });
     };
 
-    const intervalDurationInMillis = (segmentDurationInSeconds * 1000) / 100;
-    unsubscribe.current = setInterval(updateProgress, intervalDurationInMillis);
+    // only configure interval if the current segment is not the last segment
+    if (currentSegment < numberOfSegments) {
+      console.debug(`[StorySegmentIndicator] setting up interval timer`);
+      const intervalDurationInMillis = (segmentDurationInSeconds * 1000) / 100;
+      unsubscribe.current = setInterval(updateProgress, intervalDurationInMillis);
+    } else {
+      console.debug(`[StorySegmentIndicator] not setting up interval timer because current segment is the last segment`);
+    }
+
     return cleanupResources;
   }, [currentSegment]);
 
   const cleanupResources = () => {
-    console.debug(`[StorySegmentIndicator] cleaning up resources`);
+    console.debug(`[StorySegmentIndicator] resetting state & cleaning up resources`);
+    setCurrentSegmentProgress(0);
     if (unsubscribe.current) {
       clearInterval(unsubscribe.current);
       unsubscribe.current = null;

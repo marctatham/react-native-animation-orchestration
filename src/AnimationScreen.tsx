@@ -1,27 +1,30 @@
 import { StyleSheet } from "react-native";
-import React from "react";
+import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import StorySegmentIndicator from "./components/story/StorySegmentIndicator";
 
 function AnimationScreen(): JSX.Element {
+  const [currentSegment, setCurrentSegment] = useState<number>(0);
 
   const onSegmentTappedHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment ${segment} tapped`);
+    setCurrentSegment(segment);
   };
 
   const onSegmentCompletedHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment ${segment} completed`);
+    setCurrentSegment(previousSegment => previousSegment + 1);
   };
 
   return (
     <SafeAreaView style={styles.screen}>
 
       <StorySegmentIndicator
-        currentSegment={1}
+        currentSegment={currentSegment}
         numberOfSegments={4}
         onSegmentTapped={onSegmentTappedHandler}
         onSegmentCompleted={onSegmentCompletedHandler}
-        segmentDurationInSeconds={4}
+        segmentDurationInSeconds={2}
       />
 
     </SafeAreaView>
