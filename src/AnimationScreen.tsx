@@ -2,7 +2,7 @@ import { StyleSheet, Text, View } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView from "lottie-react-native";
-import StorySegmentIndicator from "./components/story/StorySegmentIndicator";
+import StorySegmentIndicator from "./components/storyIndicator/StorySegmentIndicator";
 
 function AnimationScreen(): JSX.Element {
   const [currentSegment, setCurrentSegment] = useState<number>(0);
