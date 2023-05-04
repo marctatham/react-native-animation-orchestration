@@ -43,7 +43,7 @@ function AnimationScreen(): JSX.Element {
 
       <View style={styles.sectionBody}>
         <LottieView
-          source={require("../assets/animations/animation_1.json")}
+          source={require("../../assets/animations/animation_1.json")}
           loop={false}
           autoPlay={true}
           style={styles.animation}
