@@ -6,7 +6,11 @@ import StorySegmentIndicator from "./components/story/StorySegmentIndicator";
 function AnimationScreen(): JSX.Element {
   const [currentSegment, setCurrentSegment] = useState<number>(0);
 
-  const onSegmentTappedHandler = (segment: number) => {
+  const onCurrentSegmentResetHandler = (segment: number) => {
+    console.debug(`[AnimationScreen] Segment ${segment} reset`);
+  };
+
+  const onNewSegmentTappedHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment ${segment} tapped`);
     setCurrentSegment(segment);
   };
@@ -22,7 +26,8 @@ function AnimationScreen(): JSX.Element {
       <StorySegmentIndicator
         currentSegment={currentSegment}
         numberOfSegments={4}
-        onSegmentTapped={onSegmentTappedHandler}
+        onCurrentSegmentReset={onCurrentSegmentResetHandler}
+        onNewSegmentTapped={onNewSegmentTappedHandler}
         onSegmentCompleted={onSegmentCompletedHandler}
         segmentDurationInSeconds={2}
       />

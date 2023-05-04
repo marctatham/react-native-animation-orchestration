@@ -8,7 +8,8 @@ type Props = {
   segmentDurationInSeconds: number;
   numberOfSegments: number;
   currentSegment: number;
-  onSegmentTapped: (segment: number) => void;
+  onCurrentSegmentReset: (segment: number) => void;
+  onNewSegmentTapped: (segment: number) => void;
   onSegmentCompleted: (segment: number) => void;
 };
 
@@ -17,14 +18,16 @@ type Props = {
  * @param segmentDurationInSeconds the duration of each segment in seconds
  * @param numberOfSegments the number segments in the story
  * @param currentSegment the current segment that is being displayed
- * @param onSegmentTapped the callback to be invoked when a segment is tapped
+ * @param onCurrentSegmentReset the callback to be invoked when the current segment is reset by tapping on it
+ * @param onNewSegmentTapped the callback to be invoked when a segment is tapped
  * @param onSegmentCompleted the callback to be invoked when a segment has completed
  */
 const StorySegmentIndicator: FC<Props> = ({
   segmentDurationInSeconds,
   numberOfSegments,
   currentSegment,
-  onSegmentTapped,
+  onCurrentSegmentReset,
+  onNewSegmentTapped,
   onSegmentCompleted,
 }) => {
   // facilitates current segment progress as a percentage from 0 to 100
@@ -38,7 +41,7 @@ const StorySegmentIndicator: FC<Props> = ({
    * interval duration is based on the given duration prop
    */
   useEffect(() => {
-    const updateProgress = () => {
+    const updateProgress = () =>
       setCurrentSegmentProgress((prevProgress: number) => {
         if (prevProgress >= 100) {
           cleanupResources();
@@ -48,7 +51,6 @@ const StorySegmentIndicator: FC<Props> = ({
           return prevProgress >= 100 ? 100 : prevProgress + 1;
         }
       });
-    };
 
     // only configure interval if the current segment is not the last segment
     if (currentSegment < numberOfSegments) {
@@ -86,7 +88,14 @@ const StorySegmentIndicator: FC<Props> = ({
         <Fragment>
           <TouchableOpacity
             key={`indicator-${i}`}
-            onPress={() => onSegmentTapped(i)}
+            onPress={() => {
+              if (currentSegment === i) {
+                setCurrentSegmentProgress(0);
+                onCurrentSegmentReset(i);
+              } else {
+                onNewSegmentTapped(i);
+              }
+            }}
             style={{ ...styles.itemView, height: HEIGHT }}
             hitSlop={{ top: 10, left: 0, bottom: 10, right: 0 }}>
             <StorySegment key={`indicator-${i}`} progressPercentage={progressPercentage} height={HEIGHT} />
