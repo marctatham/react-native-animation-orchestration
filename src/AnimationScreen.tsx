@@ -1,6 +1,7 @@
 import { StyleSheet } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
+import LottieView from "lottie-react-native";
 import StorySegmentIndicator from "./components/story/StorySegmentIndicator";
 
 function AnimationScreen(): JSX.Element {
@@ -20,6 +21,10 @@ function AnimationScreen(): JSX.Element {
     setCurrentSegment(previousSegment => previousSegment + 1);
   };
 
+  const onLottieAnimationComplete = () => {
+    console.debug(`[AnimationScreen] onLottieAnimationComplete`);
+  };
+
   return (
     <SafeAreaView style={styles.screen}>
 
@@ -32,6 +37,14 @@ function AnimationScreen(): JSX.Element {
         segmentDurationInSeconds={2}
       />
 
+      <LottieView
+        source={require("../assets/animations/animation_1.json")}
+        loop={false}
+        autoPlay={true}
+        style={styles.animation}
+        onAnimationFinish={onLottieAnimationComplete}
+      />
+
     </SafeAreaView>
   );
 }
@@ -42,5 +55,9 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#000",
+  },
+
+  animation: {
+    flex: 1,
   },
 });
