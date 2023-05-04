@@ -1,4 +1,4 @@
-import { StyleSheet } from "react-native";
+import { StyleSheet, Text } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView from "lottie-react-native";
@@ -37,6 +37,9 @@ function AnimationScreen(): JSX.Element {
         segmentDurationInSeconds={2}
       />
 
+      <Text style={styles.title}>Story Part 1</Text>
+      <Text style={styles.description}>This is the text to support part one of the story.</Text>
+
       <LottieView
         source={require("../assets/animations/animation_1.json")}
         loop={false}
@@ -55,6 +58,15 @@ const styles = StyleSheet.create({
   screen: {
     flex: 1,
     backgroundColor: "#000",
+  },
+
+  title: {
+    fontSize: 32,
+    color: "#FFF"
+  },
+  description: {
+    fontSize: 24,
+    color: "#FFF"
   },
 
   animation: {
