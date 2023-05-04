@@ -1,11 +1,12 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 import React, { useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView from "lottie-react-native";
 import StorySegmentIndicator from "./components/storyIndicator/StorySegmentIndicator";
+import StoryDescription from "./components/StoryDescription";
 
 function AnimationScreen(): JSX.Element {
-  const [currentSegment, setCurrentSegment] = useState<number>(0);
+  const [currentSegment, setCurrentSegment] = useState<number>(3);
 
   const onCurrentSegmentResetHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment ${segment} reset`);
@@ -17,8 +18,12 @@ function AnimationScreen(): JSX.Element {
   };
 
   const onSegmentCompletedHandler = (segment: number) => {
-    console.debug(`[AnimationScreen] Segment ${segment} completed`);
-    setCurrentSegment(previousSegment => previousSegment + 1);
+    if (currentSegment < 3) {
+      setCurrentSegment(previousSegment => previousSegment + 1);
+      console.debug(`[AnimationScreen] Segment ${segment} completed, starting next segment`);
+    } else {
+      console.debug(`[AnimationScreen] Segment ${segment} completed`);
+    }
   };
 
   const onLottieAnimationComplete = () => {
@@ -37,8 +42,7 @@ function AnimationScreen(): JSX.Element {
           onSegmentCompleted={onSegmentCompletedHandler}
           segmentDurationInSeconds={2}
         />
-        <Text style={styles.title}>Story Part 1</Text>
-        <Text style={styles.description}>This is the text to support part one of the story.</Text>
+        <StoryDescription segment={currentSegment} />
       </View>
 
       <View style={styles.sectionBody}>
@@ -63,6 +67,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#000",
     paddingHorizontal: 16,
   },
+
   sectionHeader: {
     flex: 1,
     flexDirection: "column",
@@ -71,17 +76,6 @@ const styles = StyleSheet.create({
     flex: 4,
     justifyContent: "center",
     alignContent: "center",
-  },
-
-  title: {
-    fontSize: 24,
-    fontWeight: "bold",
-    color: "#FFF",
-    marginTop: 12,
-  },
-  description: {
-    fontSize: 18,
-    color: "#FFF",
   },
 
   animation: {
