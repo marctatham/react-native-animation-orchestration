@@ -13,7 +13,7 @@ function AnimationScreen(): JSX.Element {
   const [animation, setAnimation] = useState<AnimationObject>();
 
   // local refs to facilitate imperative animation control
-  const refLottie: React.MutableRefObject<AnimatedLottieView | undefined> = useRef<AnimatedLottieView | undefined>();
+  const refLottie = useRef<LottieView>(null);
 
   /**
    * Drives the story forward
