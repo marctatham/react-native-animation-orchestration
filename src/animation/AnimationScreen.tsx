@@ -1,5 +1,5 @@
-import { StyleSheet, View } from "react-native";
-import React, { useEffect, useState } from "react";
+import { InteractionManager, StyleSheet, View } from "react-native";
+import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView, { AnimationObject } from "lottie-react-native";
 import StorySegmentIndicator from "./components/storyIndicator/StorySegmentIndicator";
@@ -12,36 +12,51 @@ function AnimationScreen(): JSX.Element {
   const [currentSegment, setCurrentSegment] = useState<number>(0);
   const [animation, setAnimation] = useState<AnimationObject>();
 
+  // local refs to facilitate imperative animation control
+  const refLottie: React.MutableRefObject<AnimatedLottieView | undefined> = useRef<AnimatedLottieView | undefined>();
+
   /**
    * Drives the story forward
    * The storyPart represents where we are within the current sequence of events
    */
-  useEffect(() => {
-    switch (storyPart) {
+  useEffect(() => startStoryPart(storyPart), [storyPart]);
+
+  const startStoryPart = (part: number) => {
+    switch (part) {
       case 0:
         setCurrentSegment(0);
         setAnimation(ANIMATION_0);
+        InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
       case 1:
         setCurrentSegment(1);
         setAnimation(ANIMATION_1);
+        InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
       case 2:
         setCurrentSegment(2);
         setAnimation(ANIMATION_2);
+        InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
       case 3:
         setCurrentSegment(3);
         setAnimation(ANIMATION_3);
+        InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
 
       default:
         console.warn(`Story part unhandled: ${storyPart}`);
     }
-  }, [storyPart]);
+  };
+
+  const resetAndPlayCurrentLottie = () => {
+    refLottie.current?.reset();
+    refLottie.current?.play();
+  };
 
   const onCurrentSegmentResetHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment ${segment} reset`);
+    startStoryPart(segment);
   };
 
   const onNewSegmentTappedHandler = (segment: number) => {
@@ -80,10 +95,11 @@ function AnimationScreen(): JSX.Element {
 
       <View style={styles.sectionBody}>
         <LottieView
+          ref={refLottie}
           // @ts-ignore - Can safely be ignored as it's actively managed is never left empty
           source={animation}
           loop={false}
-          autoPlay={true}
+          autoPlay={false}
           style={styles.animation}
           onAnimationFinish={onLottieAnimationComplete}
         />
@@ -92,6 +108,7 @@ function AnimationScreen(): JSX.Element {
     </SafeAreaView>
   );
 }
+
 
 export default AnimationScreen;
 
