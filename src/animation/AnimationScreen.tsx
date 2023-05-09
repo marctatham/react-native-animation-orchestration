@@ -18,6 +18,7 @@ function AnimationScreen(): JSX.Element {
   // local refs to facilitate imperative animation control
   const refLottie = useRef<LottieView>(null);
   const descriptionFadeAnimation = useRef(new Animated.Value(1)).current;
+  const multiSectionFadeAnimation = useRef(new Animated.Value(1)).current;
 
   /**
    * Drives the story forward
@@ -124,32 +125,31 @@ function AnimationScreen(): JSX.Element {
 
   return (
     <SafeAreaView style={styles.screen}>
+      <StorySegmentIndicator
+        currentSegment={currentSegment}
+        numberOfSegments={4}
+        onCurrentSegmentReset={onCurrentSegmentResetHandler}
+        onNewSegmentTapped={onNewSegmentTappedHandler}
+        onSegmentCompleted={onSegmentCompletedHandler}
+        segmentDurationInSeconds={4} />
 
-      <View style={styles.sectionHeader}>
-        <StorySegmentIndicator
-          currentSegment={currentSegment}
-          numberOfSegments={4}
-          onCurrentSegmentReset={onCurrentSegmentResetHandler}
-          onNewSegmentTapped={onNewSegmentTappedHandler}
-          onSegmentCompleted={onSegmentCompletedHandler}
-          segmentDurationInSeconds={4}
-        />
-        <Animated.View style={{ opacity: descriptionFadeAnimation }}>
+      <Animated.View style={{ flex: 1, opacity: multiSectionFadeAnimation }}>
+        <Animated.View style={{...styles.sectionHeader, opacity: descriptionFadeAnimation }}>
           <StoryDescription segment={currentDescription} />
         </Animated.View>
-      </View>
 
-      <View style={styles.sectionBody}>
-        <LottieView
-          ref={refLottie}
-          // @ts-ignore - Can safely be ignored as it's actively managed is never left empty
-          source={animation}
-          loop={false}
-          autoPlay={false}
-          style={styles.animation}
-          onAnimationFinish={onLottieAnimationComplete}
-        />
-      </View>
+        <View style={styles.sectionBody}>
+          <LottieView
+            ref={refLottie}
+            // @ts-ignore - Can safely be ignored as it's actively managed is never left empty
+            source={animation}
+            loop={false}
+            autoPlay={false}
+            style={styles.animation}
+            onAnimationFinish={onLottieAnimationComplete}
+          />
+        </View>
+      </Animated.View>
 
     </SafeAreaView>
   );
