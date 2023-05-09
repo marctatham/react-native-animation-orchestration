@@ -76,7 +76,7 @@ function AnimationScreen(): JSX.Element {
         break;
 
       default:
-        console.warn(`Story part unhandled: ${storyPart}`);
+        console.info(`Story part unhandled: ${storyPart}`);
     }
   };
 
