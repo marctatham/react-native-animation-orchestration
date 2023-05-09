@@ -1,4 +1,4 @@
-import { InteractionManager, StyleSheet, View } from "react-native";
+import { Animated, InteractionManager, StyleSheet, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView, { AnimationObject } from "lottie-react-native";
@@ -6,14 +6,18 @@ import StorySegmentIndicator from "./components/storyIndicator/StorySegmentIndic
 import StoryDescription from "./components/StoryDescription";
 import { ANIMATION_0, ANIMATION_1, ANIMATION_2, ANIMATION_3 } from "./AnimationScreenUtils";
 
+const FADE_DURATION: number = 750;
+
 function AnimationScreen(): JSX.Element {
 
   const [storyPart, setStoryPart] = useState<number>(0);
   const [currentSegment, setCurrentSegment] = useState<number>(0);
+  const [currentDescription, setCurrentDescription] = useState<number>(0);
   const [animation, setAnimation] = useState<AnimationObject>();
 
   // local refs to facilitate imperative animation control
   const refLottie = useRef<LottieView>(null);
+  const descriptionFadeAnimation = useRef(new Animated.Value(1)).current;
 
   /**
    * Drives the story forward
@@ -23,23 +27,50 @@ function AnimationScreen(): JSX.Element {
 
   const startStoryPart = (part: number) => {
     switch (part) {
-      case 0:
+      case 0: // Begin Segment 0
         setCurrentSegment(0);
+        setCurrentDescription(0);
         setAnimation(ANIMATION_0);
         InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
-      case 1:
+
+      case 1: // Signals completion of segment 0, fade out old description
+        descriptionFadeAnimation.setValue(1);
+        Animated.timing(descriptionFadeAnimation, {
+          toValue: 0,
+          duration: FADE_DURATION,
+          useNativeDriver: true,
+        }).start(() => incrementStoryPart());
+        break;
+
+      case 2: // set new description, fade in new description
+        descriptionFadeAnimation.setValue(0);
+        setCurrentDescription(1);
+        setAnimation(ANIMATION_1);
+        Animated.timing(descriptionFadeAnimation, {
+          toValue: 1,
+          duration: FADE_DURATION,
+          useNativeDriver: true,
+        }).start(() => incrementStoryPart());
+        break;
+
+      case 3: // Begin Segment 1
         setCurrentSegment(1);
+        setCurrentDescription(1);
         setAnimation(ANIMATION_1);
         InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
-      case 2:
+
+      case 4: // Begin Segment 2
         setCurrentSegment(2);
+        setCurrentDescription(2);
         setAnimation(ANIMATION_2);
         InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
-      case 3:
+
+      case 5: // Begin Segment 3 (final segment)
         setCurrentSegment(3);
+        setCurrentDescription(3);
         setAnimation(ANIMATION_3);
         InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
@@ -79,12 +110,12 @@ function AnimationScreen(): JSX.Element {
   };
 
   const deriveStoryPartFromSegment = (segment: number) => {
-    // TODO: for now, this is a 1 to 1 mapping of segment to story - this won't be the case for long
+    // TODO: flesh out mapping of story segments to an exact story part
     switch (segment) {
       case 0: return 0;
-      case 1: return 1;
-      case 2: return 2;
-      case 3: return 3;
+      case 1: return 3;
+      case 2: return 4;
+      case 3: return 5;
       default:
         console.warn(`TODO: let's finish fleshing this derivation logic when the rest of the orchestration is in place`);
         return 0;
@@ -103,7 +134,9 @@ function AnimationScreen(): JSX.Element {
           onSegmentCompleted={onSegmentCompletedHandler}
           segmentDurationInSeconds={4}
         />
-        <StoryDescription segment={currentSegment} />
+        <Animated.View style={{ opacity: descriptionFadeAnimation }}>
+          <StoryDescription segment={currentDescription} />
+        </Animated.View>
       </View>
 
       <View style={styles.sectionBody}>
