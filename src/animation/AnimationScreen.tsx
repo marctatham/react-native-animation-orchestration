@@ -49,33 +49,46 @@ function AnimationScreen(): JSX.Element {
     }
   };
 
+  const incrementStoryPart = () => setStoryPart(previousStoryPart => previousStoryPart + 1);
+
   const resetAndPlayCurrentLottie = () => {
     refLottie.current?.reset();
     refLottie.current?.play();
   };
 
   const onCurrentSegmentResetHandler = (segment: number) => {
-    console.debug(`[AnimationScreen] Segment ${segment} reset`);
-    startStoryPart(segment);
+    console.debug(`[AnimationScreen] Segment Reset: ${segment} `);
+    const derivedStoryPart = deriveStoryPartFromSegment(segment);
+    startStoryPart(derivedStoryPart);
   };
 
   const onNewSegmentTappedHandler = (segment: number) => {
-    console.debug(`[AnimationScreen] Segment ${segment} tapped`);
-    setStoryPart(segment); // TODO: for now, this is a 1 to 1 mapping of segment to story - this won't be the case for long
+    console.debug(`[AnimationScreen] New Segment tapped: ${segment}`);
+    const derivedStoryPart = deriveStoryPartFromSegment(segment);
+    setStoryPart(derivedStoryPart);
   };
 
   const onSegmentCompletedHandler = (segment: number) => {
-    if (currentSegment < 3) {
-      setStoryPart(previousStoryPart => previousStoryPart + 1);
-      console.debug(`[AnimationScreen] Segment ${segment} completed, starting next segment`);
-    } else {
-      console.debug(`[AnimationScreen] Segment ${segment} completed`);
-    }
+      console.debug(`[AnimationScreen] Segment Completed: ${segment}`);
+      incrementStoryPart();
   };
 
   const onLottieAnimationComplete = () => {
     console.debug(`[AnimationScreen] onLottieAnimationComplete`);
     // we ignore this callback for now, but we'll come back to it later when we start incorporating fade transitions
+  };
+
+  const deriveStoryPartFromSegment = (segment: number) => {
+    // TODO: for now, this is a 1 to 1 mapping of segment to story - this won't be the case for long
+    switch (segment) {
+      case 0: return 0;
+      case 1: return 1;
+      case 2: return 2;
+      case 3: return 3;
+      default:
+        console.warn(`TODO: let's finish fleshing this derivation logic when the rest of the orchestration is in place`);
+        return 0;
+    }
   };
 
   return (
