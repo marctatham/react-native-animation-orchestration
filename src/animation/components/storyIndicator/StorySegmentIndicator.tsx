@@ -94,10 +94,6 @@ const StorySegmentIndicator: FC<Props> = ({
       default:
         throw new Error(`[StorySegmentIndicator] unknown action: ${action}`);
     }
-
-    // reset once the action has been performed
-    // TODO: this is the offender #methinks
-    //setAction({ type: ActionType.NONE, segment: currentSegment });
   }, [action]);
 
   const startTimedProgress = (): void => {
