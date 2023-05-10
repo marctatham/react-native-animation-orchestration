@@ -36,24 +36,10 @@ const StorySegmentIndicator: FC<Props> = ({
 
   // configures the component to update progress of the current segment
   // this is time-based, based on the segmentDurationInSeconds prop
+  // note: only configure interval if the current segment is not the last segment
   useEffect(() => {
-    const updateProgress = () => {
-      setCurrentSegmentProgress((prevProgress: number) => {
-        if (prevProgress >= 100) {
-          cleanupTimer();
-          return prevProgress;
-        } else {
-          return prevProgress >= 100 ? 100 : prevProgress + 1;
-        }
-      });
-    };
-
-    // only configure interval if the current segment is not the last segment
     if (currentSegment < numberOfSegments) {
-      console.debug(`[StorySegmentIndicator] setting up for segment: ${currentSegment} - reset progress & configure timer`);
-      setCurrentSegmentProgress(0);
-      const intervalDurationInMillis = (segmentDurationInSeconds * 1000) / 100;
-      unsubscribe.current = setInterval(updateProgress, intervalDurationInMillis);
+      startTimedProgress();
     }
 
     return cleanupTimer;
@@ -66,7 +52,27 @@ const StorySegmentIndicator: FC<Props> = ({
     }
   }, [currentSegmentProgress]);
 
-  const cleanupTimer = () => {
+  const startTimedProgress = (): void => {
+    console.debug(`[StorySegmentIndicator] setting up for story segment: ${currentSegment} - reset progress & configure timer`);
+    cleanupTimer();
+    setCurrentSegmentProgress(0);
+
+    const intervalDurationInMillis = (segmentDurationInSeconds * 1000) / 100;
+    unsubscribe.current = setInterval(updateProgress, intervalDurationInMillis);
+  };
+
+  const updateProgress = (): void => {
+    setCurrentSegmentProgress((prevProgress: number) => {
+      if (prevProgress >= 100) {
+        cleanupTimer();
+        return prevProgress;
+      } else {
+        return prevProgress >= 100 ? 100 : prevProgress + 1;
+      }
+    });
+  };
+
+  const cleanupTimer = (): void => {
     if (unsubscribe.current) {
       console.debug(`[StorySegmentIndicator] cleaning up interval timer for segment ${currentSegment}`);
       clearInterval(unsubscribe.current);
@@ -90,7 +96,7 @@ const StorySegmentIndicator: FC<Props> = ({
             key={`touchableWrapper-${i}`}
             onPress={() => {
               if (currentSegment === i) {
-                setCurrentSegmentProgress(0);
+                startTimedProgress();
                 onCurrentSegmentReset(i);
               } else {
                 onNewSegmentTapped(i);
