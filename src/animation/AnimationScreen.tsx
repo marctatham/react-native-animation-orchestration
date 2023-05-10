@@ -1,4 +1,4 @@
-import { Animated, InteractionManager, StyleSheet, View } from "react-native";
+import { Animated,  InteractionManager, StyleSheet, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView, { AnimationObject } from "lottie-react-native";
@@ -29,6 +29,8 @@ function AnimationScreen(): JSX.Element {
   const startStoryPart = (part: number) => {
     switch (part) {
       case 0: // Begin Segment 0
+        multiSectionFadeAnimation.setValue(1);
+        descriptionFadeAnimation.setValue(1);
         setCurrentSegment(0);
         setCurrentDescription(0);
         setAnimation(ANIMATION_0);
@@ -41,7 +43,7 @@ function AnimationScreen(): JSX.Element {
           toValue: 0,
           duration: FADE_DURATION,
           useNativeDriver: true,
-        }).start(() => incrementStoryPart());
+        }).start(onFadeAnimationCompleteHandler);
         break;
 
       case 2: // set new description, fade in new description
@@ -52,28 +54,61 @@ function AnimationScreen(): JSX.Element {
           toValue: 1,
           duration: FADE_DURATION,
           useNativeDriver: true,
-        }).start(() => incrementStoryPart());
+        }).start(onFadeAnimationCompleteHandler);
         break;
 
       case 3: // Begin Segment 1
+        multiSectionFadeAnimation.setValue(1);
+        descriptionFadeAnimation.setValue(1);
         setCurrentSegment(1);
         setCurrentDescription(1);
         setAnimation(ANIMATION_1);
         InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
 
-      case 4: // Begin Segment 2
+      case 4: // lottie animation complete, fade out (multi-section)
+        multiSectionFadeAnimation.setValue(1);
+        Animated.timing(multiSectionFadeAnimation, {
+          toValue: 0,
+          duration: FADE_DURATION,
+          useNativeDriver: true,
+        }).start(onFadeAnimationCompleteHandler);
+        break;
+
+      case 5: // set new animation & description, fade in new multi-section
+        setCurrentDescription(2);
+        setAnimation(ANIMATION_2);
+        Animated.timing(multiSectionFadeAnimation, {
+          toValue: 1,
+          duration: FADE_DURATION,
+          useNativeDriver: true,
+        }).start((endResult: Animated.EndResult) => {
+          // if the animation was cancelled, this indicates an interruption (like changing the segment via the indicator)
+          // for cancelled fade animations we do not want to increment the storyPart
+          console.debug(`[AnimationScreen] - [onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - result has no impact on animation sequence, wait for completion of story segment`);
+        });
+        break;
+
+      case 6: // Begin Segment 2
+        multiSectionFadeAnimation.setValue(1);
+        descriptionFadeAnimation.setValue(1);
         setCurrentSegment(2);
         setCurrentDescription(2);
         setAnimation(ANIMATION_2);
         InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
         break;
 
-      case 5: // Begin Segment 3 (final segment)
+      case 7: // Begin Segment 3 (final segment)
+        multiSectionFadeAnimation.setValue(1);
+        descriptionFadeAnimation.setValue(1);
         setCurrentSegment(3);
         setCurrentDescription(3);
         setAnimation(ANIMATION_3);
         InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
+        break;
+
+      case 8:
+        console.info(`animation sequence completed.`);
         break;
 
       default:
@@ -81,21 +116,38 @@ function AnimationScreen(): JSX.Element {
     }
   };
 
-  const incrementStoryPart = () => setStoryPart(previousStoryPart => previousStoryPart + 1);
+  const incrementStoryPart = () => {
+    setStoryPart(previousStoryPart => {
+      const nextIncrement = previousStoryPart + 1;
+      console.debug(`[AnimationScreen] - [INCREMENTING] to ${nextIncrement}`);
+      return nextIncrement;
+    });
+  };
 
   const resetAndPlayCurrentLottie = () => {
     refLottie.current?.reset();
     refLottie.current?.play();
   };
 
+  const stopAnyFadeAnimations = () => {
+    descriptionFadeAnimation.stopAnimation();
+    multiSectionFadeAnimation.stopAnimation();
+  };
+
+  // explicitly stops any potential animations that may be in progress, restarts current storyPart
   const onCurrentSegmentResetHandler = (segment: number) => {
     console.debug(`[AnimationScreen] Segment Reset: ${segment} `);
+    stopAnyFadeAnimations();
+
     const derivedStoryPart = deriveStoryPartFromSegment(segment);
     startStoryPart(derivedStoryPart);
   };
 
+  // explicitly stops any potential animations that may be in progress, begins playing at the appropriate storyPart
   const onNewSegmentTappedHandler = (segment: number) => {
     console.debug(`[AnimationScreen] New Segment tapped: ${segment}`);
+    stopAnyFadeAnimations();
+
     const derivedStoryPart = deriveStoryPartFromSegment(segment);
     setStoryPart(derivedStoryPart);
   };
@@ -105,18 +157,38 @@ function AnimationScreen(): JSX.Element {
       incrementStoryPart();
   };
 
-  const onLottieAnimationComplete = () => {
-    console.debug(`[AnimationScreen] onLottieAnimationComplete`);
-    // we ignore this callback for now, but we'll come back to it later when we start incorporating fade transitions
+  const onLottieAnimationComplete = (isCancelled: boolean) => {
+    if (isCancelled) {
+      console.debug(`[AnimationScreen] onLottieAnimationComplete cancelled`);
+    } else {
+      if (currentSegment === 1) {
+        console.debug(`[AnimationScreen] onLottieAnimationComplete for segment: ${currentSegment} - continue`);
+        incrementStoryPart();
+      } else {
+        console.debug(`[AnimationScreen] onLottieAnimationComplete for segment: ${currentSegment}`);
+      }
+    }
   };
+
+  const onFadeAnimationCompleteHandler = (endResult: Animated.EndResult) => {
+    // if the animation was cancelled, this indicates an interruption (like changing the segment via the indicator)
+    // for cancelled fade animations we do not want to increment the storyPart
+    const hasEndResult: boolean = endResult === undefined || endResult.finished;
+    if (hasEndResult) {
+      console.debug(`[AnimationScreen] - [onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - incrementing`);
+      incrementStoryPart();
+    } else {
+      console.debug(`[AnimationScreen] - [onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - IGNORED`);
+    }
+  }
 
   const deriveStoryPartFromSegment = (segment: number) => {
     // TODO: flesh out mapping of story segments to an exact story part
     switch (segment) {
       case 0: return 0;
       case 1: return 3;
-      case 2: return 4;
-      case 3: return 5;
+      case 2: return 6;
+      case 3: return 7;
       default:
         console.warn(`TODO: let's finish fleshing this derivation logic when the rest of the orchestration is in place`);
         return 0;
