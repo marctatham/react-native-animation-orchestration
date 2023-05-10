@@ -214,7 +214,7 @@ function AnimationScreen(): JSX.Element {
         numberOfSegments={4}
         onCurrentSegmentReset={onCurrentSegmentResetHandler}
         onNewSegmentTapped={onNewSegmentTappedHandler}
-        onSegmentCompleted={onSegmentCompletedHandler}
+        onStorySegmentCompleted={onSegmentCompletedHandler}
         segmentDurationInSeconds={4} />
 
       <Animated.View style={{ flex: 1, opacity: multiSectionFadeAnimation }}>

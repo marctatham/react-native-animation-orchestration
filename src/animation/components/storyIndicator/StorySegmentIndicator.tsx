@@ -10,7 +10,7 @@ type Props = {
   currentSegment: number;
   onCurrentSegmentReset: (segment: number) => void;
   onNewSegmentTapped: (segment: number) => void;
-  onSegmentCompleted: (segment: number) => void;
+  onStorySegmentCompleted: (segment: number) => void;
 };
 
 // the action that needs to be performed, either as a result of a
@@ -44,7 +44,7 @@ const StorySegmentIndicator: FC<Props> = ({
   currentSegment,
   onCurrentSegmentReset,
   onNewSegmentTapped,
-  onSegmentCompleted,
+  onStorySegmentCompleted,
 }) => {
   // facilitates current segment progress as a percentage from 0 to 100
   const [currentSegmentProgress, setCurrentSegmentProgress] = useState<number>(0);
@@ -88,7 +88,7 @@ const StorySegmentIndicator: FC<Props> = ({
         break;
 
       case ActionType.SEGMENT_COMPLETED:
-        onSegmentCompleted(action.segment);
+        onStorySegmentCompleted(action.segment);
         break;
 
       default:
