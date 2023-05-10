@@ -8,7 +8,6 @@ type Props = {
   segmentDurationInSeconds: number;
   numberOfSegments: number;
   currentSegment: number;
-  onCurrentSegmentReset: (segment: number) => void;
   onStorySegmentTapped: (segment: number) => void;
   onStorySegmentCompleted: (segment: number) => void;
 };
@@ -17,7 +16,6 @@ type Props = {
 // user interaction or as a result of the timeout having expired
 enum ActionType {
   NONE,
-  CURRENT_SEGMENT_RESET,
   NEW_SEGMENT_TAPPED,
   SEGMENT_COMPLETED,
 }
@@ -34,15 +32,13 @@ interface Action {
  * @param segmentDurationInSeconds the duration of each segment in seconds
  * @param numberOfSegments the number segments in the story
  * @param currentSegment the current segment that is being displayed
- * @param onCurrentSegmentReset the callback to be invoked when the current segment is reset by tapping on it
- * @param onNewSegmentTapped the callback to be invoked when a segment is tapped
- * @param onSegmentCompleted the callback to be invoked when a segment has completed
+ * @param onStorySegmentTapped the callback to be invoked when a segment is tapped
+ * @param onStorySegmentCompleted the callback to be invoked when a segment has completed
  */
 const StorySegmentIndicator: FC<Props> = ({
   segmentDurationInSeconds,
   numberOfSegments,
   currentSegment,
-  onCurrentSegmentReset,
   onStorySegmentTapped,
   onStorySegmentCompleted,
 }) => {
@@ -73,12 +69,6 @@ const StorySegmentIndicator: FC<Props> = ({
   useEffect(() => {
     switch (action.type) {
       case ActionType.NONE:
-        break;
-
-      case ActionType.CURRENT_SEGMENT_RESET:
-        setCurrentSegmentProgress(0);
-        startTimedProgress();
-        onCurrentSegmentReset(action.segment);
         break;
 
       case ActionType.NEW_SEGMENT_TAPPED:
@@ -143,7 +133,7 @@ const StorySegmentIndicator: FC<Props> = ({
               // timer & set the subsequent action to be performed
               cleanupTimer();
               setAction({
-                type: currentSegment === i ? ActionType.CURRENT_SEGMENT_RESET : ActionType.NEW_SEGMENT_TAPPED,
+                type: ActionType.NEW_SEGMENT_TAPPED,
                 segment: i,
               });
             }}

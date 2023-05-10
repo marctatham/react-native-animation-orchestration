@@ -1,4 +1,4 @@
-import { Animated,  InteractionManager, StyleSheet, View } from "react-native";
+import { Animated, InteractionManager, StyleSheet, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView, { AnimationObject } from "lottie-react-native";
@@ -83,9 +83,11 @@ function AnimationScreen(): JSX.Element {
           duration: FADE_DURATION,
           useNativeDriver: true,
         }).start((endResult: Animated.EndResult) => {
-          // if the animation was cancelled, this indicates an interruption (like changing the segment via the indicator)
-          // for cancelled fade animations we do not want to increment the storyPart
-          console.debug(`[AnimationScreen] - [onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - result has no impact on animation sequence, wait for completion of story segment`);
+          // We do not need this to increment the storyPart. This fadeAnimation completes before this
+          // StorySegment completes. And by simply doing nothing here, we allow the StorySegment to
+          // complete and begin the next Segment by playing the animation, which is a more visually
+          // appealing effect.
+          console.debug(`[AnimationScreen]-[onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - result has no impact on animation sequence, wait for completion of story segment`);
         });
         break;
 
@@ -119,7 +121,7 @@ function AnimationScreen(): JSX.Element {
   const incrementStoryPart = () => {
     setStoryPart(previousStoryPart => {
       const nextIncrement = previousStoryPart + 1;
-      console.debug(`[AnimationScreen] - [INCREMENTING] to ${nextIncrement}`);
+      console.debug(`[AnimationScreen]-[INCREMENTING] to ${nextIncrement}`);
       return nextIncrement;
     });
   };
@@ -134,20 +136,12 @@ function AnimationScreen(): JSX.Element {
     multiSectionFadeAnimation.stopAnimation();
   };
 
-  // explicitly stops any potential animations that may be in progress, restarts current storyPart
-  const onCurrentSegmentResetHandler = (segment: number) => {
-    const derivedStoryPart = deriveStoryPartFromSegment(segment);
-    console.debug(`[AnimationScreen] Segment Reset: ${segment} - setting to storyPart: ${derivedStoryPart}`);
+  // explicitly stops any potential animations that may be in progress, begins playing at the appropriate storyPart
+  const onStorySegmentTappedHandler = (segment: number) => {
     stopAnyFadeAnimations();
+    const derivedStoryPart = deriveStoryPartFromSegment(segment);
 
-    // TODO: BUG: crux of the issue is that...
-    // segment 3 is represented by storyParts: 3, 4 & 5
-    // if we are on step 3 and we set the storyPart to 3, the useEffect will not be triggered
-    // if we are on step 4 and/or 5, we only START (instead of set) it will result in an awkward JUMP to the next part
-    //       - 4 -> 5 or
-    //       - 5 -> 6
-    //        Despite the fact that the user is observing storyPart 3 being played
-    // the below is a tempfix - but i believe we can do better
+    console.debug(`[AnimationScreen] [StorySegment] tapped: ${segment}, derived story part: ${derivedStoryPart}`);
     if (derivedStoryPart === storyPart) {
       startStoryPart(derivedStoryPart);
     } else {
@@ -155,29 +149,20 @@ function AnimationScreen(): JSX.Element {
     }
   };
 
-  // explicitly stops any potential animations that may be in progress, begins playing at the appropriate storyPart
-  const onNewSegmentTappedHandler = (segment: number) => {
-    console.debug(`[AnimationScreen] New Segment tapped: ${segment}`);
-    stopAnyFadeAnimations();
-
-    const derivedStoryPart = deriveStoryPartFromSegment(segment);
-    setStoryPart(derivedStoryPart);
-  };
-
-  const onSegmentCompletedHandler = (segment: number) => {
-      console.debug(`[AnimationScreen] Segment Completed: ${segment}`);
-      incrementStoryPart();
+  const onStorySegmentCompleted = (segment: number) => {
+    console.debug(`[AnimationScreen] [StorySegment] Completed: ${segment}`);
+    incrementStoryPart();
   };
 
   const onLottieAnimationComplete = (isCancelled: boolean) => {
     if (isCancelled) {
-      console.debug(`[AnimationScreen] onLottieAnimationComplete cancelled`);
+      console.debug(`[AnimationScreen] [onLottieAnimationComplete] cancelled`);
     } else {
       if (currentSegment === 1) {
-        console.debug(`[AnimationScreen] onLottieAnimationComplete for segment: ${currentSegment} - continue`);
+        console.debug(`[AnimationScreen] [onLottieAnimationComplete] for segment: ${currentSegment} - continue`);
         incrementStoryPart();
       } else {
-        console.debug(`[AnimationScreen] onLottieAnimationComplete for segment: ${currentSegment}`);
+        console.debug(`[AnimationScreen] [onLottieAnimationComplete] for segment: ${currentSegment}`);
       }
     }
   };
@@ -187,12 +172,12 @@ function AnimationScreen(): JSX.Element {
     // for cancelled fade animations we do not want to increment the storyPart
     const hasEndResult: boolean = endResult === undefined || endResult.finished;
     if (hasEndResult) {
-      console.debug(`[AnimationScreen] - [onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - incrementing`);
+      console.debug(`[AnimationScreen]-[onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - incrementing`);
       incrementStoryPart();
     } else {
-      console.debug(`[AnimationScreen] - [onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - IGNORED`);
+      console.debug(`[AnimationScreen]-[onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - IGNORED`);
     }
-  }
+  };
 
   const deriveStoryPartFromSegment = (segment: number) => {
     // TODO: flesh out mapping of story segments to an exact story part
@@ -212,13 +197,12 @@ function AnimationScreen(): JSX.Element {
       <StorySegmentIndicator
         currentSegment={currentSegment}
         numberOfSegments={4}
-        onCurrentSegmentReset={onCurrentSegmentResetHandler}
-        onStorySegmentTapped={onNewSegmentTappedHandler}
-        onStorySegmentCompleted={onSegmentCompletedHandler}
+        onStorySegmentTapped={onStorySegmentTappedHandler}
+        onStorySegmentCompleted={onStorySegmentCompleted}
         segmentDurationInSeconds={4} />
 
       <Animated.View style={{ flex: 1, opacity: multiSectionFadeAnimation }}>
-        <Animated.View style={{...styles.sectionHeader, opacity: descriptionFadeAnimation }}>
+        <Animated.View style={{ ...styles.sectionHeader, opacity: descriptionFadeAnimation }}>
           <StoryDescription segment={currentDescription} />
         </Animated.View>
 
