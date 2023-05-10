@@ -43,7 +43,7 @@ function AnimationScreen(): JSX.Element {
           toValue: 0,
           duration: FADE_DURATION,
           useNativeDriver: true,
-        }).start(onFadeAnimationCompleteHandler);
+        }).start(onFadeCompleteIncrementingHandler);
         break;
 
       case 2: // set new description, fade in new description
@@ -54,7 +54,7 @@ function AnimationScreen(): JSX.Element {
           toValue: 1,
           duration: FADE_DURATION,
           useNativeDriver: true,
-        }).start(onFadeAnimationCompleteHandler);
+        }).start(onFadeCompleteIncrementingHandler);
         break;
 
       case 3: // Begin Segment 1
@@ -72,7 +72,7 @@ function AnimationScreen(): JSX.Element {
           toValue: 0,
           duration: FADE_DURATION,
           useNativeDriver: true,
-        }).start(onFadeAnimationCompleteHandler);
+        }).start(onFadeCompleteIncrementingHandler);
         break;
 
       case 5: // set new animation & description, fade in new multi-section
@@ -167,15 +167,20 @@ function AnimationScreen(): JSX.Element {
     }
   };
 
-  const onFadeAnimationCompleteHandler = (endResult: Animated.EndResult) => {
-    // if the animation was cancelled, this indicates an interruption (like changing the segment via the indicator)
-    // for cancelled fade animations we do not want to increment the storyPart
+  /**
+   * Increments the storyPart upon successful completion of a fade animation
+   *
+   * If the animation did not complete, this indicates an interruption to the animation sequence such
+   * as changing the segment via the StorySegmentIndicator. Cancelled animations are therefore ignored.
+   * @param endResult The EndResult indicating the successful completion state of the animation
+   */
+  const onFadeCompleteIncrementingHandler = (endResult: Animated.EndResult) => {
     const hasEndResult: boolean = endResult === undefined || endResult.finished;
     if (hasEndResult) {
-      console.debug(`[AnimationScreen]-[onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - incrementing`);
+      console.debug(`[AnimationScreen]-[onFadeCompleteIncrementingHandler] check ${JSON.stringify(endResult)} - incrementing`);
       incrementStoryPart();
     } else {
-      console.debug(`[AnimationScreen]-[onFadeAnimationCompleteHandler] check ${JSON.stringify(endResult)} - IGNORED`);
+      console.debug(`[AnimationScreen]-[onFadeCompleteIncrementingHandler] check ${JSON.stringify(endResult)} - IGNORED`);
     }
   };
 
