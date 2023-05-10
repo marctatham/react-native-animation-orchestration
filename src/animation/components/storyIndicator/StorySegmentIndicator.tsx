@@ -44,7 +44,7 @@ const StorySegmentIndicator: FC<Props> = ({
 }) => {
   // facilitates current segment progress as a percentage from 0 to 100
   const [currentSegmentProgress, setCurrentSegmentProgress] = useState<number>(0);
-  const [action, setAction] = useState<Action>({ type: ActionType.NONE, segment:currentSegment });
+  const [action, setAction] = useState<Action>({ type: ActionType.NONE, segment: currentSegment });
 
   const unsubscribe: any = useRef(); // facilitates interval management
 

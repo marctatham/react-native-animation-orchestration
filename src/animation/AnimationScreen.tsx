@@ -182,10 +182,14 @@ function AnimationScreen(): JSX.Element {
   const deriveStoryPartFromSegment = (segment: number) => {
     // TODO: flesh out mapping of story segments to an exact story part
     switch (segment) {
-      case 0: return 0;
-      case 1: return 3;
-      case 2: return 6;
-      case 3: return 7;
+      case 0:
+        return 0;
+      case 1:
+        return 3;
+      case 2:
+        return 6;
+      case 3:
+        return 7;
       default:
         console.warn(`TODO: let's finish fleshing this derivation logic when the rest of the orchestration is in place`);
         return 0;
