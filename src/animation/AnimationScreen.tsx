@@ -9,7 +9,7 @@ import { ANIMATION_0, ANIMATION_1, ANIMATION_2, ANIMATION_3 } from "./AnimationS
 const FADE_DURATION: number = 750;
 
 function AnimationScreen(): JSX.Element {
-
+  // local state to support the various aspects of the animation sequence
   const [storyPart, setStoryPart] = useState<number>(0);
   const [currentSegment, setCurrentSegment] = useState<number>(0);
   const [currentDescription, setCurrentDescription] = useState<number>(0);
@@ -185,7 +185,6 @@ function AnimationScreen(): JSX.Element {
   };
 
   const deriveStoryPartFromSegment = (segment: number) => {
-    // TODO: flesh out mapping of story segments to an exact story part
     switch (segment) {
       case 0:
         return 0;
