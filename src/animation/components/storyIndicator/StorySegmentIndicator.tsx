@@ -13,6 +13,22 @@ type Props = {
   onSegmentCompleted: (segment: number) => void;
 };
 
+// the action that needs to be performed, either as a result of a
+// user interaction or as a result of the timeout having expired
+enum ActionType {
+  NONE,
+  CURRENT_SEGMENT_RESET,
+  NEW_SEGMENT_TAPPED,
+  SEGMENT_COMPLETED,
+}
+
+// simple data carrying model to carry the action & the segment to which the action applies (if relevant)
+interface Action {
+  type: ActionType;
+  segment: number;
+}
+
+
 /**
  * This component displays a horizontal bar that mimics an instagram-style story indicator
  * @param segmentDurationInSeconds the duration of each segment in seconds
@@ -32,6 +48,8 @@ const StorySegmentIndicator: FC<Props> = ({
 }) => {
   // facilitates current segment progress as a percentage from 0 to 100
   const [currentSegmentProgress, setCurrentSegmentProgress] = useState<number>(0);
+  const [action, setAction] = useState<Action>({ type: ActionType.NONE, segment:currentSegment });
+
   const unsubscribe: any = useRef(); // facilitates interval management
 
   // configures the component to update progress of the current segment
@@ -48,20 +66,50 @@ const StorySegmentIndicator: FC<Props> = ({
   // manages notifying the consumer about completion of the current segment
   useEffect(() => {
     if (currentSegmentProgress === 100) {
-      onSegmentCompleted(currentSegment);
+      setAction({ type: ActionType.SEGMENT_COMPLETED, segment: currentSegment });
     }
   }, [currentSegmentProgress]);
 
+  useEffect(() => {
+    switch (action.type) {
+      case ActionType.NONE:
+        break;
+
+      case ActionType.CURRENT_SEGMENT_RESET:
+        setCurrentSegmentProgress(0);
+        startTimedProgress();
+        onCurrentSegmentReset(action.segment);
+        break;
+
+      case ActionType.NEW_SEGMENT_TAPPED:
+        setCurrentSegmentProgress(0);
+        startTimedProgress();
+        onNewSegmentTapped(action.segment);
+        break;
+
+      case ActionType.SEGMENT_COMPLETED:
+        onSegmentCompleted(action.segment);
+        break;
+
+      default:
+        throw new Error(`[StorySegmentIndicator] unknown action: ${action}`);
+    }
+
+    // reset once the action has been performed
+    // TODO: this is the offender #methinks
+    //setAction({ type: ActionType.NONE, segment: currentSegment });
+  }, [action]);
+
   const startTimedProgress = (): void => {
-    console.debug(`[StorySegmentIndicator] setting up for story segment: ${currentSegment} - reset progress & configure timer`);
+    //console.debug(`[StorySegmentIndicator] setting up for story segment: ${currentSegment} - reset progress & configure timer`);
     cleanupTimer();
     setCurrentSegmentProgress(0);
 
     const intervalDurationInMillis = (segmentDurationInSeconds * 1000) / 100;
-    unsubscribe.current = setInterval(updateProgress, intervalDurationInMillis);
+    unsubscribe.current = setInterval(incrementProgress, intervalDurationInMillis);
   };
 
-  const updateProgress = (): void => {
+  const incrementProgress = (): void => {
     setCurrentSegmentProgress((prevProgress: number) => {
       if (prevProgress >= 100) {
         cleanupTimer();
@@ -74,7 +122,7 @@ const StorySegmentIndicator: FC<Props> = ({
 
   const cleanupTimer = (): void => {
     if (unsubscribe.current) {
-      console.debug(`[StorySegmentIndicator] cleaning up interval timer for segment ${currentSegment}`);
+      //console.debug(`[StorySegmentIndicator] cleaning up interval timer for segment ${currentSegment}`);
       clearInterval(unsubscribe.current);
       unsubscribe.current = null;
     }
@@ -95,12 +143,13 @@ const StorySegmentIndicator: FC<Props> = ({
           <TouchableOpacity
             key={`touchableWrapper-${i}`}
             onPress={() => {
-              if (currentSegment === i) {
-                startTimedProgress();
-                onCurrentSegmentReset(i);
-              } else {
-                onNewSegmentTapped(i);
-              }
+              // when a story segment is tapped, immediately clear the
+              // timer & set the subsequent action to be performed
+              cleanupTimer();
+              setAction({
+                type: currentSegment === i ? ActionType.CURRENT_SEGMENT_RESET : ActionType.NEW_SEGMENT_TAPPED,
+                segment: i,
+              });
             }}
             style={{ ...styles.itemView, height: HEIGHT }}
             hitSlop={{ top: 10, left: 0, bottom: 10, right: 0 }}>
