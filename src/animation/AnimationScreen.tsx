@@ -213,7 +213,7 @@ function AnimationScreen(): JSX.Element {
         currentSegment={currentSegment}
         numberOfSegments={4}
         onCurrentSegmentReset={onCurrentSegmentResetHandler}
-        onNewSegmentTapped={onNewSegmentTappedHandler}
+        onStorySegmentTapped={onNewSegmentTappedHandler}
         onStorySegmentCompleted={onSegmentCompletedHandler}
         segmentDurationInSeconds={4} />
 
