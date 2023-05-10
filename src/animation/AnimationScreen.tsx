@@ -136,11 +136,23 @@ function AnimationScreen(): JSX.Element {
 
   // explicitly stops any potential animations that may be in progress, restarts current storyPart
   const onCurrentSegmentResetHandler = (segment: number) => {
-    console.debug(`[AnimationScreen] Segment Reset: ${segment} `);
+    const derivedStoryPart = deriveStoryPartFromSegment(segment);
+    console.debug(`[AnimationScreen] Segment Reset: ${segment} - setting to storyPart: ${derivedStoryPart}`);
     stopAnyFadeAnimations();
 
-    const derivedStoryPart = deriveStoryPartFromSegment(segment);
-    startStoryPart(derivedStoryPart);
+    // TODO: BUG: crux of the issue is that...
+    // segment 3 is represented by storyParts: 3, 4 & 5
+    // if we are on step 3 and we set the storyPart to 3, the useEffect will not be triggered
+    // if we are on step 4 and/or 5, we only START (instead of set) it will result in an awkward JUMP to the next part
+    //       - 4 -> 5 or
+    //       - 5 -> 6
+    //        Despite the fact that the user is observing storyPart 3 being played
+    // the below is a tempfix - but i believe we can do better
+    if (derivedStoryPart === storyPart) {
+      startStoryPart(derivedStoryPart);
+    } else {
+      setStoryPart(derivedStoryPart);
+    }
   };
 
   // explicitly stops any potential animations that may be in progress, begins playing at the appropriate storyPart
