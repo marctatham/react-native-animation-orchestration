@@ -1,4 +1,4 @@
-import { Animated, InteractionManager, StyleSheet, View } from "react-native";
+import { Animated, InteractionManager, Platform, StyleSheet, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView, { AnimationObject } from "lottie-react-native";
@@ -202,6 +202,9 @@ function AnimationScreen(): JSX.Element {
 
   return (
     <SafeAreaView style={styles.screen}>
+      {/*Android benefits from some additional margin at the top of the screen*/}
+      {Platform.OS === "android" && <View style={{ height: 16 }} />}
+
       <StorySegmentIndicator
         currentSegment={currentSegment}
         numberOfSegments={4}
