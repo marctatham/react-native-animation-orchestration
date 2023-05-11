@@ -6,7 +6,8 @@ import StorySegmentIndicator from "./components/storyIndicator/StorySegmentIndic
 import StoryDescription from "./components/StoryDescription";
 import { ANIMATION_0, ANIMATION_1, ANIMATION_2, ANIMATION_3 } from "./AnimationScreenUtils";
 
-const FADE_DURATION: number = 750;
+const FADE_DURATION_IN_MILLIS: number = 750;
+const STORY_SEGMENT_DURATION_IN_SECONDS: number = 4;
 
 function AnimationScreen(): JSX.Element {
   // local state to support the various aspects of the animation sequence
@@ -19,12 +20,17 @@ function AnimationScreen(): JSX.Element {
   const refLottie = useRef<LottieView>(null);
   const descriptionFadeAnimation = useRef(new Animated.Value(1)).current;
   const multiSectionFadeAnimation = useRef(new Animated.Value(1)).current;
+  const refTimeoutHandle: any = useRef<number>();
 
   /**
    * Drives the story forward
    * The storyPart represents where we are within the current sequence of events
    */
-  useEffect(() => startStoryPart(storyPart), [storyPart]);
+  useEffect(() => {
+    startStoryPart(storyPart)
+
+    return () => cleanup();
+  }, [storyPart]);
 
   const startStoryPart = (part: number) => {
     switch (part) {
@@ -41,7 +47,7 @@ function AnimationScreen(): JSX.Element {
         descriptionFadeAnimation.setValue(1);
         Animated.timing(descriptionFadeAnimation, {
           toValue: 0,
-          duration: FADE_DURATION,
+          duration: FADE_DURATION_IN_MILLIS,
           useNativeDriver: true,
         }).start(onFadeCompleteIncrementingHandler);
         break;
@@ -52,7 +58,7 @@ function AnimationScreen(): JSX.Element {
         setAnimation(ANIMATION_1);
         Animated.timing(descriptionFadeAnimation, {
           toValue: 1,
-          duration: FADE_DURATION,
+          duration: FADE_DURATION_IN_MILLIS,
           useNativeDriver: true,
         }).start(onFadeCompleteIncrementingHandler);
         break;
@@ -64,13 +70,19 @@ function AnimationScreen(): JSX.Element {
         setCurrentDescription(1);
         setAnimation(ANIMATION_1);
         InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
+
+        // begin timer to invoke the next storyPart shortly before the next segment begins
+        // in particular we want to support the fade out, the subsequent fade in & a little extra wiggle room
+        const timeoutInMillis = (STORY_SEGMENT_DURATION_IN_SECONDS * 1000) - (FADE_DURATION_IN_MILLIS * 2);
+        console.debug(`[AnimationScreen]-[startStoryPart] timeoutInMillis: ${timeoutInMillis}`);
+        refTimeoutHandle.current = setTimeout(onTimeoutIncrementingHandler, timeoutInMillis);
         break;
 
       case 4: // lottie animation complete, fade out (multi-section)
         multiSectionFadeAnimation.setValue(1);
         Animated.timing(multiSectionFadeAnimation, {
           toValue: 0,
-          duration: FADE_DURATION,
+          duration: FADE_DURATION_IN_MILLIS,
           useNativeDriver: true,
         }).start(onFadeCompleteIncrementingHandler);
         break;
@@ -80,7 +92,7 @@ function AnimationScreen(): JSX.Element {
         setAnimation(ANIMATION_2);
         Animated.timing(multiSectionFadeAnimation, {
           toValue: 1,
-          duration: FADE_DURATION,
+          duration: FADE_DURATION_IN_MILLIS,
           useNativeDriver: true,
         }).start((endResult: Animated.EndResult) => {
           // We do not need this to increment the storyPart. This fadeAnimation completes before this
@@ -118,13 +130,11 @@ function AnimationScreen(): JSX.Element {
     }
   };
 
-  const incrementStoryPart = () => {
-    setStoryPart(previousStoryPart => {
-      const nextIncrement = previousStoryPart + 1;
-      console.debug(`[AnimationScreen]-[INCREMENTING] to ${nextIncrement}`);
-      return nextIncrement;
-    });
-  };
+  const incrementStoryPart = () => setStoryPart(previousStoryPart => {
+    const nextIncrement = previousStoryPart + 1;
+    console.debug(`[AnimationScreen]-[INCREMENTING] to ${nextIncrement}`);
+    return nextIncrement;
+  });
 
   const resetAndPlayCurrentLottie = () => {
     refLottie.current?.reset();
@@ -134,6 +144,14 @@ function AnimationScreen(): JSX.Element {
   const stopAnyFadeAnimations = () => {
     descriptionFadeAnimation.stopAnimation();
     multiSectionFadeAnimation.stopAnimation();
+  };
+
+  const cleanup = (): void => {
+    if (refTimeoutHandle.current) {
+      console.debug(`[AnimationScreen]-[cleanup] to ${refTimeoutHandle.current}`);
+      clearInterval(refTimeoutHandle.current);
+      refTimeoutHandle.current = null;
+    }
   };
 
   // explicitly stops any potential animations that may be in progress, begins playing at the appropriate storyPart
@@ -154,19 +172,6 @@ function AnimationScreen(): JSX.Element {
     incrementStoryPart();
   };
 
-  const onLottieAnimationComplete = (isCancelled: boolean) => {
-    if (isCancelled) {
-      console.debug(`[AnimationScreen] [onLottieAnimationComplete] cancelled`);
-    } else {
-      if (currentSegment === 1) {
-        console.debug(`[AnimationScreen] [onLottieAnimationComplete] for segment: ${currentSegment} - continue`);
-        incrementStoryPart();
-      } else {
-        console.debug(`[AnimationScreen] [onLottieAnimationComplete] for segment: ${currentSegment}`);
-      }
-    }
-  };
-
   /**
    * Increments the storyPart upon successful completion of a fade animation
    *
@@ -183,6 +188,11 @@ function AnimationScreen(): JSX.Element {
       console.debug(`[AnimationScreen]-[onFadeCompleteIncrementingHandler] check ${JSON.stringify(endResult)} - IGNORED`);
     }
   };
+
+  const onTimeoutIncrementingHandler = () => {
+    console.debug(`[AnimationScreen]-[onTimeoutIncrementingHandler] proceed to increment story part`);
+    incrementStoryPart();
+  }
 
   const deriveStoryPartFromSegment = (segment: number) => {
     switch (segment) {
@@ -210,7 +220,7 @@ function AnimationScreen(): JSX.Element {
         numberOfSegments={4}
         onStorySegmentTapped={onStorySegmentTappedHandler}
         onStorySegmentCompleted={onStorySegmentCompleted}
-        segmentDurationInSeconds={4} />
+        segmentDurationInSeconds={STORY_SEGMENT_DURATION_IN_SECONDS} />
 
       <Animated.View style={{ flex: 1, opacity: multiSectionFadeAnimation }}>
         <Animated.View style={{ ...styles.sectionHeader, opacity: descriptionFadeAnimation }}>
@@ -225,7 +235,9 @@ function AnimationScreen(): JSX.Element {
             loop={false}
             autoPlay={false}
             style={styles.animation}
-            onAnimationFinish={onLottieAnimationComplete}
+            // onAnimationFinish={...} Note: avoid relying on this as a callback
+            // while it works reliably on iOS but android, which receives duplicate
+            // calls with an isCancelled argument that can not be relied upon.
           />
         </View>
       </Animated.View>
