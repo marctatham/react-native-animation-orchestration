@@ -63,19 +63,19 @@ function AnimationScreen(): JSX.Element {
         }).start(onFadeCompleteIncrementingHandler);
         break;
 
-      case 3: // Begin Segment 1
+      case 3: // Begin Segment 1, play lottie & begin timer to invoke the next storyPart
         multiSectionFadeAnimation.setValue(1);
         descriptionFadeAnimation.setValue(1);
         setCurrentSegment(1);
         setCurrentDescription(1);
         setAnimation(ANIMATION_1);
-        InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
-
-        // begin timer to invoke the next storyPart shortly before the next segment begins
-        // in particular we want to support the fade out, the subsequent fade in & a little extra wiggle room
-        const timeoutInMillis = (STORY_SEGMENT_DURATION_IN_SECONDS * 1000) - (FADE_DURATION_IN_MILLIS * 2);
-        console.debug(`[AnimationScreen]-[startStoryPart] timeoutInMillis: ${timeoutInMillis}`);
-        refTimeoutHandle.current = setTimeout(onTimeoutIncrementingHandler, timeoutInMillis);
+        InteractionManager.runAfterInteractions(() => {
+          resetAndPlayCurrentLottie();
+          // begin timer to invoke the next storyPart shortly before the next segment begins
+          // in particular we want to support the fade out, the subsequent fade in & a little extra wiggle room
+          const timeoutInMillis = (STORY_SEGMENT_DURATION_IN_SECONDS * 1000) - (FADE_DURATION_IN_MILLIS * 2);
+          refTimeoutHandle.current = setTimeout(onTimeoutIncrementingHandler, timeoutInMillis);
+        });
         break;
 
       case 4: // lottie animation complete, fade out (multi-section)
@@ -148,7 +148,7 @@ function AnimationScreen(): JSX.Element {
 
   const cleanup = (): void => {
     if (refTimeoutHandle.current) {
-      console.debug(`[AnimationScreen]-[cleanup] to ${refTimeoutHandle.current}`);
+      console.debug(`[AnimationScreen]-[cleanup] timeoutHandle: ${refTimeoutHandle.current}`);
       clearInterval(refTimeoutHandle.current);
       refTimeoutHandle.current = null;
     }
