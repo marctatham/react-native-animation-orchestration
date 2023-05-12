@@ -71,11 +71,12 @@ function AnimationScreen(): JSX.Element {
         setAnimation(ANIMATION_1);
         InteractionManager.runAfterInteractions(() => {
           resetAndPlayCurrentLottie();
-          // begin timer to invoke the next storyPart shortly before the next segment begins
-          // in particular we want to support the fade out, the subsequent fade in & a little extra wiggle room
-          const timeoutInMillis = (STORY_SEGMENT_DURATION_IN_SECONDS * 1000) - (FADE_DURATION_IN_MILLIS * 2);
-          refTimeoutHandle.current = setTimeout(onTimeoutIncrementingHandler, timeoutInMillis);
         });
+
+        // begin timer to invoke the next storyPart shortly before the next segment begins
+        // in particular we want to support the fade out, the subsequent fade in & a little extra wiggle room
+        const timeoutInMillis = (STORY_SEGMENT_DURATION_IN_SECONDS * 1000) - (FADE_DURATION_IN_MILLIS * 2);
+        refTimeoutHandle.current = setTimeout(onTimeoutIncrementingHandler, timeoutInMillis);
         break;
 
       case 4: // lottie animation complete, fade out (multi-section)
@@ -216,7 +217,7 @@ function AnimationScreen(): JSX.Element {
       {Platform.OS === "android" && <View style={{ height: 16 }} />}
 
       <StorySegmentIndicator
-        currentSegment={currentSegment}
+        currentSegment={currentSegment} // 0-indexed
         numberOfSegments={4}
         onStorySegmentTapped={onStorySegmentTappedHandler}
         onStorySegmentCompleted={onStorySegmentCompleted}
