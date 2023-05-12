@@ -1,4 +1,4 @@
-import { Animated, InteractionManager, Platform, StyleSheet, View } from "react-native";
+import { Animated, Platform, StyleSheet, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { SafeAreaView } from "react-native-safe-area-context";
 import LottieView, { AnimationObject } from "lottie-react-native";
@@ -42,7 +42,7 @@ function AnimationScreen(): JSX.Element {
         setCurrentSegment(0);
         setCurrentDescription(0);
         setAnimation(ANIMATION_0);
-        InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
+        resetAndPlayCurrentLottie();
         break;
 
       case 1: // Signals completion of segment 0, fade out old description
@@ -71,9 +71,7 @@ function AnimationScreen(): JSX.Element {
         setCurrentSegment(1);
         setCurrentDescription(1);
         setAnimation(ANIMATION_1);
-        InteractionManager.runAfterInteractions(() => {
-          resetAndPlayCurrentLottie();
-        });
+        resetAndPlayCurrentLottie();
 
         // begin timer to invoke the next storyPart shortly before the next segment begins
         // in particular we want to support the fade out, the subsequent fade in & a little extra wiggle room
@@ -112,7 +110,7 @@ function AnimationScreen(): JSX.Element {
         setCurrentSegment(2);
         setCurrentDescription(2);
         setAnimation(ANIMATION_2);
-        InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
+        resetAndPlayCurrentLottie();
         break;
 
       case 7: // Begin Segment 3 (final segment)
@@ -121,7 +119,7 @@ function AnimationScreen(): JSX.Element {
         setCurrentSegment(3);
         setCurrentDescription(3);
         setAnimation(ANIMATION_3);
-        InteractionManager.runAfterInteractions(() => resetAndPlayCurrentLottie());
+        resetAndPlayCurrentLottie();
         break;
 
       case 8:
