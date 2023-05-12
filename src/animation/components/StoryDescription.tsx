@@ -14,7 +14,10 @@ class StoryDescription extends PureComponent<Props> {
     return (
       <View style={styles.textContainer}>
         <Text style={styles.title}>Story Part 1</Text>
-        <Text style={styles.description}>This is the text to support part one of the story.</Text>
+        <Text style={styles.description}>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit. Suspendisse suscipit tellus ligula, non tincidunt
+          erat tempus eu. Vivamus sed ultricies.
+        </Text>
       </View>
     );
   }
@@ -23,7 +26,10 @@ class StoryDescription extends PureComponent<Props> {
     return (
       <View style={styles.textContainer}>
         <Text style={styles.title}>Story Part 2</Text>
-        <Text style={styles.description}>Part 2 looks notably different.</Text>
+        <Text style={styles.description}>
+          Integer pretium quam eu molestie mollis. Mauris non ex varius, finibus urna sed, pharetra libero. Quisque sit
+          amet nisi sed.
+        </Text>
       </View>
     );
   }
@@ -32,8 +38,10 @@ class StoryDescription extends PureComponent<Props> {
     return (
       <View style={styles.textContainer}>
         <Text style={styles.title}>Story Part 3</Text>
-        <Text style={styles.description}>Here's some more supporting text to support part 3 of the instagram-style
-          story</Text>
+        <Text style={styles.description}>
+          Nullam sit amet convallis nibh. Morbi id interdum purus. Cras fringilla sit amet lectus quis laoreet. Aliquam
+          aliquam sagittis erat.
+        </Text>
       </View>
     );
   }
@@ -42,7 +50,10 @@ class StoryDescription extends PureComponent<Props> {
     return (
       <View style={styles.textContainer}>
         <Text style={styles.title}>Story Part 4</Text>
-        <Text style={styles.description}>Part 4 looks notably different again!</Text>
+        <Text style={styles.description}>
+          Etiam dapibus, magna id placerat laoreet, mauris lectus mollis nisl, in pellentesque est nisi eu leo. Sed sed
+          nisi ornare.
+        </Text>
       </View>
     );
   }
