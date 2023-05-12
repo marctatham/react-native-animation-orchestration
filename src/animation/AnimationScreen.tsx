@@ -33,6 +33,8 @@ function AnimationScreen(): JSX.Element {
   }, [storyPart]);
 
   const startStoryPart = (part: number) => {
+    cleanup(); // no harm in calling cleanup before starting a new story part #safetyfirst
+
     switch (part) {
       case 0: // Begin Segment 0
         multiSectionFadeAnimation.setValue(1);
