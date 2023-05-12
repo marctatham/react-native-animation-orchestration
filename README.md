@@ -12,4 +12,8 @@ well as the finished codebase to accompany it.
 # what it looks like
 | iOS  | Android |
 | ------------- | ------------- |
-| https://github.com/marctatham/react-native-animation-orchestration/assets/1032038/345dda5d-6305-45be-ad8f-e93497bb7250 | Content Cell  |
+| ![iOS](https://github.com/marctatham/react-native-animation-orchestration/assets/1032038/1d0e3a72-6054-4eff-b896-26b822c68ea2) | TODO: add  |
+| or as a video: https://imgur.com/8s0gsS3 | TODO: add |
+
+
+
