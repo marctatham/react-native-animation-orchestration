@@ -6,11 +6,12 @@ React Native project that exists to support an upcoming medium
 article I'm putting together to demonstrate a simple technique
 to orchestrating advanced sequencing of animations (and/or more)
 
-In this Instagram-style story animation sequence, we orchestrate
-- lottie animations
-- Animated fade transitions
-- interact with custom events (such as a story segment completing) 
+In this Instagram-style story animation sequence, we work with 
+- lottie animations (swapping animations in, playing animations at key intervals within the sequence)
+- custom fading of elements in/out of the screen
 - Timers
+- interact with events that take place (such as a story segment completing) 
+- react to human interactions (such as the user changing the current story segment)
 
 Be sure to check back soon for the full supporting article as 
 well as the finished codebase to accompany it.
