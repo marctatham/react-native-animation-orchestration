@@ -9,7 +9,7 @@ to orchestrating advanced sequencing of animations (and/or more)
 Be sure to check back soon for the full supporting article as 
 well as the finished codebase to accompany it.
 
-# what it looks like
+## What it looks like
 | iOS  | Android |
 | ------------- | ------------- |
 | ![iOS](https://github.com/marctatham/react-native-animation-orchestration/assets/1032038/1d0e3a72-6054-4eff-b896-26b822c68ea2) | TODO: add  |
