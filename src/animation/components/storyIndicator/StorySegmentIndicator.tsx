@@ -127,6 +127,7 @@ const StorySegmentIndicator: FC<Props> = ({
       const fragment =
         <Fragment key={`fragmentWrapper-${i}`}>
           <TouchableOpacity
+            style={styles.itemView}
             key={`touchableWrapper-${i}`}
             onPress={() => {
               // when a story segment is tapped, immediately clear the
@@ -136,9 +137,7 @@ const StorySegmentIndicator: FC<Props> = ({
                 type: ActionType.NEW_SEGMENT_TAPPED,
                 segment: i,
               });
-            }}
-            style={{ ...styles.itemView, height: HEIGHT }}
-            hitSlop={{ top: 10, left: 0, bottom: 10, right: 0 }}>
+            }}>
             <StorySegment key={`storySegment-${i}`} progressPercentage={progressPercentage} height={HEIGHT} />
           </TouchableOpacity>
 
@@ -164,10 +163,14 @@ export default StorySegmentIndicator;
 const styles = StyleSheet.create({
   container: {
     flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    alignContent: "center",
   },
 
   itemView: {
     flex: 1,
-    borderRadius: 2,
+    height: 20,
+    justifyContent: "center",
   },
 });

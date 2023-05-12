@@ -11,7 +11,7 @@ class StorySegment extends PureComponent<Props> {
     const { progressPercentage, height } = this.props;
 
     return (
-      <View style={{ flex: 1 }}>
+      <View style={{ height: height }}>
         <View
           style={{
             flex: 1,
