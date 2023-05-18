@@ -37,6 +37,7 @@ function AnimationScreen(): JSX.Element {
 
     switch (part) {
       case 0: // Begin Segment 0
+        console.debug(`[AnimationScreen]-Begin animation sequence`);
         multiSectionFadeAnimation.setValue(1);
         descriptionFadeAnimation.setValue(1);
         setCurrentSegment(0);
