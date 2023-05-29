@@ -1,7 +1,14 @@
 import React, { FC, useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
 
-import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
+import Animated, {
+  Easing,
+  runOnJS,
+  SharedValue,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 
 const HEIGHT: number = 3;
 
@@ -44,37 +51,45 @@ const StorySegmentIndicator: FC<Props> = ({
   onStorySegmentCompleted,
 }) => {
   // facilitates current segment progress as a percentage from 0 to 100
-  const [currentSegmentProgress, setCurrentSegmentProgress] = useState<number>(0);
   const [action, setAction] = useState<Action>({ type: ActionType.NONE, segment: currentSegment });
 
   // reanimated hooks to facilitate animating the current segment
-  const sv = useSharedValue(0);
+  const sv: SharedValue<number> = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => ({ width: `${sv.value}%` }), []);
-  const handleAnimatePercentage = () => sv.value = withTiming(100, { duration: segmentDurationInSeconds * 1000 });
+
+  const handleAnimatePercentage = () => {
+    sv.value = 0;
+    sv.value = withTiming(
+      100,
+      { duration: segmentDurationInSeconds * 1000, easing: Easing.linear },
+      (finished) => {
+        console.debug(`[StorySegmentIndicator] isFinished: ${finished}`);
+        if (finished) {
+          console.debug(`[StorySegmentIndicator] segment ${currentSegment} completed`);
+          runOnJS(onStorySegmentCompleted)(currentSegment);
+        }
+      });
+  };
 
   // configures the component to update progress of the current segment
   // this is time-based, based on the segmentDurationInSeconds prop
   // note: only configure interval if the current segment is not the last segment
   useEffect(() => {
+    sv.value = 0;
     if (currentSegment < numberOfSegments) {
+      console.debug(`[StorySegmentIndicator] beginning animation of current segment ${currentSegment}`);
       handleAnimatePercentage();
     }
   }, [currentSegment]);
 
-  // manages notifying the consumer about completion of the current segment
-  useEffect(() => {
-    if (currentSegmentProgress === 100) {
-      setAction({ type: ActionType.SEGMENT_COMPLETED, segment: currentSegment });
-    }
-  }, [currentSegmentProgress]);
 
   useEffect(() => {
+    console.debug(`[StorySegmentIndicator] Executing ACTION: ${JSON.stringify(action)}`);
     switch (action.type) {
       case ActionType.NONE:
         break;
 
       case ActionType.NEW_SEGMENT_TAPPED:
-        setCurrentSegmentProgress(0);
         handleAnimatePercentage();
         onStorySegmentTapped(action.segment);
         break;
