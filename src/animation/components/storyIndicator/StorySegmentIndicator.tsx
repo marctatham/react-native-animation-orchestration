@@ -1,4 +1,4 @@
-import React, { FC, useEffect, useState } from "react";
+import React, { FC, useEffect } from "react";
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
 
 import Animated, {
@@ -20,21 +20,6 @@ type Props = {
   onStorySegmentCompleted: (segment: number) => void;
 };
 
-// the action that needs to be performed, either as a result of a
-// user interaction or as a result of the timeout having expired
-enum ActionType {
-  NONE,
-  NEW_SEGMENT_TAPPED,
-  SEGMENT_COMPLETED,
-}
-
-// simple data carrying model to carry the action & the segment to which the action applies (if relevant)
-interface Action {
-  type: ActionType;
-  segment: number;
-}
-
-
 /**
  * This component displays a horizontal bar that mimics an instagram-style story indicator
  * @param segmentDurationInSeconds the duration of each segment in seconds
@@ -50,8 +35,6 @@ const StorySegmentIndicator: FC<Props> = ({
   onStorySegmentTapped,
   onStorySegmentCompleted,
 }) => {
-  // facilitates current segment progress as a percentage from 0 to 100
-  const [action, setAction] = useState<Action>({ type: ActionType.NONE, segment: currentSegment });
 
   // reanimated hooks to facilitate animating the current segment
   const sv: SharedValue<number> = useSharedValue(0);
@@ -81,27 +64,6 @@ const StorySegmentIndicator: FC<Props> = ({
       handleAnimatePercentage();
     }
   }, [currentSegment]);
-
-
-  useEffect(() => {
-    console.debug(`[StorySegmentIndicator] Executing ACTION: ${JSON.stringify(action)}`);
-    switch (action.type) {
-      case ActionType.NONE:
-        break;
-
-      case ActionType.NEW_SEGMENT_TAPPED:
-        handleAnimatePercentage();
-        onStorySegmentTapped(action.segment);
-        break;
-
-      case ActionType.SEGMENT_COMPLETED:
-        onStorySegmentCompleted(action.segment);
-        break;
-
-      default:
-        throw new Error(`[StorySegmentIndicator] unknown action: ${action}`);
-    }
-  }, [action]);
 
   const renderContents = (): JSX.Element[] => {
     const storySegments: JSX.Element[] = [];
@@ -133,10 +95,10 @@ const StorySegmentIndicator: FC<Props> = ({
     return <TouchableOpacity
       style={styles.itemView}
       key={`touchableWrapper-${i}`}
-      onPress={() => setAction({
-        type: ActionType.NEW_SEGMENT_TAPPED,
-        segment: i,
-      })}
+      onPress={() => {
+        handleAnimatePercentage();
+        onStorySegmentTapped(i);
+      }}
       hitSlop={{ top: 10, bottom: 10, left: 0, right: 0 }}>
 
       <View style={{
