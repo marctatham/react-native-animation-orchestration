@@ -35,11 +35,20 @@ const StorySegmentIndicator: FC<Props> = ({
   onStorySegmentTapped,
   onStorySegmentCompleted,
 }) => {
-
   // reanimated hooks to facilitate animating the current segment
   const sv: SharedValue<number> = useSharedValue(0);
   const animatedStyle = useAnimatedStyle(() => ({ width: `${sv.value}%` }), []);
 
+  // Begins incrementing progress of the current segment
+  useEffect(() => {
+    if (currentSegment < numberOfSegments) {
+      handleAnimatePercentage();
+    }
+  }, [currentSegment]);
+
+  /**
+   * Animates the current segment to from 0 to 100% width over the span of segmentDurationInSeconds
+   */
   const handleAnimatePercentage = () => {
     sv.value = 0;
     sv.value = withTiming(
@@ -52,16 +61,6 @@ const StorySegmentIndicator: FC<Props> = ({
         }
       });
   };
-
-  // configures the component to update progress of the current segment
-  // this is time-based, based on the segmentDurationInSeconds prop
-  // note: only configure interval if the current segment is not the last segment
-  useEffect(() => {
-    if (currentSegment < numberOfSegments) {
-      console.debug(`[StorySegmentIndicator] beginning animation of current segment ${currentSegment} & currentValue ${sv.value}`);
-      handleAnimatePercentage();
-    }
-  }, [currentSegment]);
 
   const renderContents = (): JSX.Element[] => {
     const storySegments: JSX.Element[] = [];
