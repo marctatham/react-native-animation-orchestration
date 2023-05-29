@@ -1,6 +1,7 @@
-import React, { FC, Fragment, useEffect, useRef, useState } from "react";
-import { StyleSheet, TouchableOpacity, View } from "react-native";
-import StorySegment from "./StorySegment";
+import React, { FC, useEffect, useState } from "react";
+import { StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
+
+import Animated, { useAnimatedStyle, useSharedValue, withTiming } from "react-native-reanimated";
 
 const HEIGHT: number = 3;
 
@@ -46,17 +47,18 @@ const StorySegmentIndicator: FC<Props> = ({
   const [currentSegmentProgress, setCurrentSegmentProgress] = useState<number>(0);
   const [action, setAction] = useState<Action>({ type: ActionType.NONE, segment: currentSegment });
 
-  const unsubscribe: any = useRef(); // facilitates interval management
+  // reanimated hooks to facilitate animating the current segment
+  const sv = useSharedValue(0);
+  const animatedStyle = useAnimatedStyle(() => ({ width: `${sv.value}%` }), []);
+  const handleAnimatePercentage = () => sv.value = withTiming(100, { duration: segmentDurationInSeconds * 1000 });
 
   // configures the component to update progress of the current segment
   // this is time-based, based on the segmentDurationInSeconds prop
   // note: only configure interval if the current segment is not the last segment
   useEffect(() => {
     if (currentSegment < numberOfSegments) {
-      startTimedProgress();
+      handleAnimatePercentage();
     }
-
-    return cleanupTimer;
   }, [currentSegment]);
 
   // manages notifying the consumer about completion of the current segment
@@ -73,7 +75,7 @@ const StorySegmentIndicator: FC<Props> = ({
 
       case ActionType.NEW_SEGMENT_TAPPED:
         setCurrentSegmentProgress(0);
-        startTimedProgress();
+        handleAnimatePercentage();
         onStorySegmentTapped(action.segment);
         break;
 
@@ -86,74 +88,60 @@ const StorySegmentIndicator: FC<Props> = ({
     }
   }, [action]);
 
-  const startTimedProgress = (): void => {
-    //console.debug(`[StorySegmentIndicator] setting up for story segment: ${currentSegment} - reset progress & configure timer`);
-    cleanupTimer();
-    setCurrentSegmentProgress(0);
-
-    const intervalDurationInMillis = (segmentDurationInSeconds * 1000) / 100;
-    unsubscribe.current = setInterval(incrementProgress, intervalDurationInMillis);
-  };
-
-  const incrementProgress = (): void => {
-    setCurrentSegmentProgress((prevProgress: number) => {
-      if (prevProgress >= 100) {
-        cleanupTimer();
-        return prevProgress;
-      } else {
-        return prevProgress >= 100 ? 100 : prevProgress + 1;
-      }
-    });
-  };
-
-  const cleanupTimer = (): void => {
-    if (unsubscribe.current) {
-      //console.debug(`[StorySegmentIndicator] cleaning up interval timer for segment ${currentSegment}`);
-      clearInterval(unsubscribe.current);
-      unsubscribe.current = null;
-    }
-  };
-
-  const renderTouchableStorySegment = (): JSX.Element[] => {
+  const renderContents = (): JSX.Element[] => {
     const storySegments: JSX.Element[] = [];
     for (let i = 0; i < numberOfSegments; i++) {
-      let progressPercentage = 0;
-      if (i < currentSegment) {
-        progressPercentage = 100;
-      } else if (i === currentSegment) {
-        progressPercentage = currentSegmentProgress;
-      }
-
-      const fragment =
-        <Fragment key={`fragmentWrapper-${i}`}>
-          <TouchableOpacity
-            style={styles.itemView}
-            key={`touchableWrapper-${i}`}
-            onPress={() => {
-              // when a story segment is tapped, immediately clear the
-              // timer & set the subsequent action to be performed
-              cleanupTimer();
-              setAction({
-                type: ActionType.NEW_SEGMENT_TAPPED,
-                segment: i,
-              });
-            }}>
-            <StorySegment key={`storySegment-${i}`} progressPercentage={progressPercentage} height={HEIGHT} />
-          </TouchableOpacity>
-
-          {/*Add margin in between story segments when relevant*/}
-          {i !== numberOfSegments - 1 && <View key={`marginView-${i}`} style={{ width: 8 }} />}
-        </Fragment>;
-
+      const fragment = renderTouchableStorySegment(i);
       storySegments.push(fragment);
+
+      // add margin next to each touchable story segment
+      if (i !== numberOfSegments - 1) {
+        storySegments.push(<View key={`marginView-${i}`} style={{ width: 8 }} />);
+      }
     }
 
     return storySegments;
   };
 
+  const renderTouchableStorySegment = (i: number): JSX.Element => {
+    const baseStyle: ViewStyle = {
+      height: HEIGHT,
+      borderRadius: 2,
+      backgroundColor: "#FCFCFC",
+      opacity: 1,
+      position: "absolute",
+      left: 0,
+      top: 0,
+      width: `${i < currentSegment ? 100 : 0}%`, // covers any segment before/after current segment
+    };
+
+    return <TouchableOpacity
+      style={styles.itemView}
+      key={`touchableWrapper-${i}`}
+      onPress={() => setAction({
+        type: ActionType.NEW_SEGMENT_TAPPED,
+        segment: i,
+      })}
+      hitSlop={{ top: 10, bottom: 10, left: 0, right: 0 }}>
+
+      <View style={{
+        flex: 1,
+        height: HEIGHT,
+        backgroundColor: "#FCFCFC",
+        opacity: 0.2,
+      }}
+      />
+
+      {i === currentSegment
+        ? <Animated.View style={[baseStyle, animatedStyle]} />
+        : <View style={baseStyle} />
+      }
+    </TouchableOpacity>;
+  };
+
   return (
     <View style={styles.container}>
-      {renderTouchableStorySegment()}
+      {renderContents()}
     </View>
   );
 };
@@ -166,11 +154,12 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     alignContent: "center",
+    height: 20,
   },
 
   itemView: {
     flex: 1,
-    height: 20,
+    height: HEIGHT,
     justifyContent: "center",
   },
 });
