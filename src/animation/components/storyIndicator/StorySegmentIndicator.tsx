@@ -1,4 +1,4 @@
-import React, { FC, useEffect } from "react";
+import React, { FC, useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View, ViewStyle } from "react-native";
 
 import Animated, {
@@ -46,7 +46,6 @@ const StorySegmentIndicator: FC<Props> = ({
       100,
       { duration: segmentDurationInSeconds * 1000, easing: Easing.linear },
       (finished) => {
-        console.debug(`[StorySegmentIndicator] isFinished: ${finished}`);
         if (finished) {
           console.debug(`[StorySegmentIndicator] segment ${currentSegment} completed`);
           runOnJS(onStorySegmentCompleted)(currentSegment);
@@ -58,9 +57,8 @@ const StorySegmentIndicator: FC<Props> = ({
   // this is time-based, based on the segmentDurationInSeconds prop
   // note: only configure interval if the current segment is not the last segment
   useEffect(() => {
-    sv.value = 0;
     if (currentSegment < numberOfSegments) {
-      console.debug(`[StorySegmentIndicator] beginning animation of current segment ${currentSegment}`);
+      console.debug(`[StorySegmentIndicator] beginning animation of current segment ${currentSegment} & currentValue ${sv.value}`);
       handleAnimatePercentage();
     }
   }, [currentSegment]);
