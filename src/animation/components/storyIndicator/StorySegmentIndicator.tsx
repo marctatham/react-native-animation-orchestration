@@ -37,12 +37,8 @@ const StorySegmentIndicator: FC<Props> = ({
         segmentDurationInSeconds={segmentDurationInSeconds}
         isComplete={i < currentSegment}
         autoPlay={i === currentSegment}
-        onStorySegmentCompleted={() => {
-          onStorySegmentCompleted(i);
-        }}
-        onStorySegmentTapped={() => {
-          onStorySegmentTapped(i);
-        }}
+        onStorySegmentCompleted={() => onStorySegmentCompleted(i)}
+        onStorySegmentTapped={() => onStorySegmentTapped(i)}
         segmentIndex={i}
       />);
 
