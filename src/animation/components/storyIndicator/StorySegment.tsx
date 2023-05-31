@@ -29,15 +29,19 @@ export const StorySegment: FC<Props> = ({
   onStorySegmentCompleted,
 }) => {
   const dynamicHeightStyle: ViewStyle = { height: height };
+
   const sharedValuePercentage: SharedValue<number> = useSharedValue(0);
-  const dynamicWidthStyle: ViewStyle = useAnimatedStyle(() => ({
-    width: `${sharedValuePercentage.value}%`,
-  }), []);
+  const dynamicWidthStyle: ViewStyle = useAnimatedStyle(() => ({ width: `${sharedValuePercentage.value}%` }), []);
 
   // Manages animating the segment progress
   useEffect(() => {
     if (!isComplete && autoPlay) {
       animateProgress();
+    } else {
+      // ensure that the segment is reset to when there is no requirement to animate
+      // in these scenarios only the non-animated segment is displayed (full/empty)
+      // and so this helps ensure that the segment is always "ready to go"
+      sharedValuePercentage.value = 0;
     }
   }, [isComplete, autoPlay]);
 
@@ -71,10 +75,10 @@ export const StorySegment: FC<Props> = ({
     }, dynamicHeightStyle]}
     />
 
-    {isComplete
-      ? <View style={[styles.itemBaseStyle, dynamicHeightStyle, styles.itemWidthFullStyle]} />
-      : autoPlay
-        ? <Animated.View style={[styles.itemBaseStyle, dynamicHeightStyle, dynamicWidthStyle]} />
+    {autoPlay
+      ? <Animated.View style={[styles.itemBaseStyle, dynamicHeightStyle, dynamicWidthStyle]} />
+      : isComplete
+        ? <View style={[styles.itemBaseStyle, dynamicHeightStyle, styles.itemWidthFullStyle]} />
         : <View style={[styles.itemBaseStyle, dynamicHeightStyle, styles.itemWidthEmptyStyle]} />
     }
 
