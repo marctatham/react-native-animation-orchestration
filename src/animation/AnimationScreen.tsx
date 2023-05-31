@@ -27,7 +27,7 @@ function AnimationScreen(): JSX.Element {
    * The storyPart represents where we are within the current sequence of events
    */
   useEffect(() => {
-    startStoryPart(storyPart)
+    startStoryPart(storyPart);
 
     return () => cleanup();
   }, [storyPart]);
@@ -140,12 +140,12 @@ function AnimationScreen(): JSX.Element {
     return nextIncrement;
   });
 
-  const resetAndPlayCurrentLottie = () => {
+  const resetAndPlayCurrentLottie = (): void => {
     refLottie.current?.reset();
     refLottie.current?.play();
   };
 
-  const stopAnyFadeAnimations = () => {
+  const stopAnyFadeAnimations = (): void => {
     descriptionFadeAnimation.stopAnimation();
     multiSectionFadeAnimation.stopAnimation();
   };
@@ -159,7 +159,7 @@ function AnimationScreen(): JSX.Element {
   };
 
   // explicitly stops any potential animations that may be in progress, begins playing at the appropriate storyPart
-  const onStorySegmentTappedHandler = (segment: number) => {
+  const onStorySegmentTappedHandler = (segment: number): void => {
     stopAnyFadeAnimations();
     const derivedStoryPart = deriveStoryPartFromSegment(segment);
 
@@ -171,7 +171,7 @@ function AnimationScreen(): JSX.Element {
     }
   };
 
-  const onStorySegmentCompleted = (segment: number) => {
+  const onStorySegmentCompleted = (segment: number): void => {
     console.debug(`[AnimationScreen] [StorySegment] Completed: ${segment}`);
     incrementStoryPart();
   };
@@ -183,7 +183,7 @@ function AnimationScreen(): JSX.Element {
    * as changing the segment via the StorySegmentIndicator. Cancelled animations are therefore ignored.
    * @param endResult The EndResult indicating the successful completion state of the animation
    */
-  const onFadeCompleteIncrementingHandler = (endResult: Animated.EndResult) => {
+  const onFadeCompleteIncrementingHandler = (endResult: Animated.EndResult): void => {
     const hasEndResult: boolean = endResult === undefined || endResult.finished;
     if (hasEndResult) {
       console.debug(`[AnimationScreen]-[onFadeCompleteIncrementingHandler] check ${JSON.stringify(endResult)} - incrementing`);
@@ -193,12 +193,12 @@ function AnimationScreen(): JSX.Element {
     }
   };
 
-  const onTimeoutIncrementingHandler = () => {
+  const onTimeoutIncrementingHandler = (): void => {
     console.debug(`[AnimationScreen]-[onTimeoutIncrementingHandler] proceed to increment story part`);
     incrementStoryPart();
-  }
+  };
 
-  const deriveStoryPartFromSegment = (segment: number) => {
+  const deriveStoryPartFromSegment = (segment: number): number => {
     switch (segment) {
       case 0:
         return 0;
