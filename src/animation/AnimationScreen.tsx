@@ -6,8 +6,8 @@ import StorySegmentIndicator from "./components/storyIndicator/StorySegmentIndic
 import StoryDescription from "./components/StoryDescription";
 import { ANIMATION_0, ANIMATION_1, ANIMATION_2, ANIMATION_3 } from "./AnimationScreenUtils";
 
-const FADE_DURATION_IN_MILLIS: number = 750;
-const STORY_SEGMENT_DURATION_IN_SECONDS: number = 4;
+const FADE_DURATION_IN_MILLIS: number = 1500;
+const STORY_SEGMENT_DURATION_IN_SECONDS: number = 5;
 
 function AnimationScreen(): JSX.Element {
   // local state to support the various aspects of the animation sequence
